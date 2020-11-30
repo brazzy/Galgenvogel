@@ -29,10 +29,10 @@ class Player {
 		for(var i=0; i<width; i++) {
 			game.setDot(i, 0, Color.Gray);
 				
-			if(i<=this.maxHealth) {
+			if(i<this.maxHealth) {
 				game.setDot(i, 0, Color.Red);
 			}
-			if(i<=this.health) {
+			if(i<this.health) {
 				game.setDot(i, 0, Color.Orange);
 			}
 

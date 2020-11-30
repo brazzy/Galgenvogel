@@ -46,7 +46,7 @@ class Level {
 		var newX = being.x;
 		var newY = being.y;
 		if (direction == Direction.Up) {
-			newY = normalize(being.y-1, this.heigth);
+			newY = normalize(being.y-1, this.height);
 		}
 		if (direction == Direction.Down) {
 			newY = normalize(being.y+1, this.height);
