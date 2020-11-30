@@ -1,3 +1,5 @@
+import { Color, Direction } from './engine-types.js';
+
 class Player {
 	constructor(colorCycle){
 		this._colorCycle = colorCycle;

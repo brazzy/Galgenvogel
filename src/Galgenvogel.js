@@ -1,6 +1,6 @@
-import { Level } from './modules/level.js';
-import { Player } from './modules/player.js';
-import { Monster } from './modules/monster.js';
+import { Level } from './level.js';
+import { Player } from './player.js';
+import { Monster } from './monster.js';
 
 const NUM_MONSTERS = 5;
 const FRAME_RATE = 5;
@@ -43,7 +43,9 @@ function create(game) {
 	game.player = new Player(FRAME_RATE);
 	game.level.placeRandomly(game.player);
 	for(var i=0; i<NUM_MONSTERS; i++) {
-		game.level.placeRandomly(new Monster());
+		const monster = new Monster();
+		game.level.placeRandomly(monster);
+		monsters.push(monster);
 	}		
 }
 
@@ -54,6 +56,11 @@ function update(game) {
 
 function onKeyPress(direction) {
 	game.level.move(game.player, direction);
+
+	game.level.setTarget(game.player);
+	for(const monster of monsters){
+		game.level.moveTowardsTarget(monster);
+	}
 }
 
 let config = {

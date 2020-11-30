@@ -1,0 +1,13 @@
+{
+  "type": "module",
+  "main": "src/Galgenvogel.js",
+  "name": "Galgenvogel",
+  "version": "0.0.1",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^26.6"
+  },
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  }
+}
