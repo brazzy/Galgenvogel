@@ -42,26 +42,29 @@ class Level {
 		}
 	}
 	
-	move(being, direction) {
-		var newX = being.x;
-		var newY = being.y;
+	step(x, y, direction) {
 		if (direction == Direction.Up) {
-			newY = normalize(being.y-1, this.height);
+			y = normalize(y-1, this.height);
 		}
 		if (direction == Direction.Down) {
-			newY = normalize(being.y+1, this.height);
+			y = normalize(y+1, this.height);
 		}
 		if (direction == Direction.Left) {
-			newX = normalize(being.x-1, this.width);
+			x = normalize(x-1, this.width);
 		}
 		if (direction == Direction.Right) {
-			newX = normalize(being.x+1, this.width);
+			x = normalize(x+1, this.width);
 		}
-		if(!this.grid[newY][newX].spotTaken) {
-			this.grid[newY][newX] = being;
+		return [x, y];
+	}
+		
+	move(being, direction) {
+		const [x, y] = this.step(being.x, being.y, direction);
+		if(!this.grid[y][x].spotTaken) {
+			this.grid[y][x] = being;
 			this.grid[being.y][being.x] = EMPTY;
-			being.x = newX;
-			being.y = newY;
+			being.x = x;
+			being.y = y;
 		}
 	}
 }
