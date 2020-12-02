@@ -36,6 +36,10 @@ class Level {
 		being.y = y;
 	}
 	
+	remove(being) {
+		this.grid[being.y][being.x] = EMPTY;
+	}
+	
 	paint(game) {
 		for(var i=0; i<this.height; i++) {
 			for(var j=0; j<this.width; j++) {
@@ -85,23 +89,31 @@ class Level {
 		return [x, y];
 	}
 		
+	/**
+	 * Returns null if move was successful, blocking entity otherwise
+	 */
 	move(being, direction) {
 		const [x, y] = this.step(being.x, being.y, direction);
-		if(!this.grid[y][x].spotTaken) {
+		if(this.grid[y][x].spotTaken) {
+			return this.grid[y][x];
+		} else {
+			this.remove(being);
 			this.grid[y][x] = being;
-			this.grid[being.y][being.x] = EMPTY;
 			being.x = x;
 			being.y = y;
+			return null;
 		}
 	}
 	
+	/**
+	 * Returns null if move was successful, blocking entity otherwise
+	 */
 	moveTowardsTarget(being) {
 		const currentDistance = this.targetDistances[being.y][being.x];
 		for(const direction of [Direction.Up, Direction.Down, Direction.Right, Direction.Left]) {
 			const [nextX, nextY] = this.step(being.x, being.y, direction);
 			if(this.targetDistances[nextY][nextX] < currentDistance) {
-				this.move(being, direction);
-				return;
+				return this.move(being, direction);
 			}
 		}
 	}

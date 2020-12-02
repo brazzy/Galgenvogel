@@ -55,11 +55,23 @@ function update(game) {
 }
 
 function onKeyPress(direction) {
-	game.level.move(game.player, direction);
-
-	game.level.setTarget(game.player);
-	for(const monster of monsters){
-		game.level.moveTowardsTarget(monster);
+	game.player.move(game.level, direction);
+	for(var i = monsters.length-1; i>=0; i--){
+		const monster = monsters[i];
+		if(monster.health > 0){
+			monster.move(game.level);
+			if(game.player.health <= 0) {
+				alert("you lose!");				
+				location.reload();
+			}
+		} else {
+			game.level.remove(monster);
+			monsters.splice(i, 1);
+			if(monsters.length==0) {
+				alert("you win!");
+				location.reload();
+			}
+		}
 	}
 }
 

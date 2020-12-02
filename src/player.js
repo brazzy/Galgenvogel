@@ -5,13 +5,14 @@ class Player {
 		this._colorCycle = colorCycle;
 		this._colorCount = colorCycle;
 		
-		this.spotTaken = true,
+		this.isPlayer = true;
+		this.spotTaken = true;
 		this.health=3;
 		this.maxHealth=5;
 		this.magic = 1;
 		this.maxMagic=2;		
-		this.x=0;
-		this.y=0;
+		this.x=null;
+		this.y=null;
 	}
 
 	get color() {
@@ -23,6 +24,18 @@ class Player {
 			return Color.Green;
 		}
 	}
+	
+	move(level, direction) {
+		const blocker = level.move(this, direction);
+		if(blocker) {
+			if(blocker.health) {
+				blocker.health--;
+			}
+		} else {
+			level.setTarget(this);
+		}
+	}
+
 	
 	paintStatus(game, width) {
 		for(var i=0; i<width; i++) {
