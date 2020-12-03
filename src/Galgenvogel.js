@@ -2,7 +2,7 @@ import { Level } from './level.js';
 import { Player } from './player.js';
 import { Monster } from './monster.js';
 
-const NUM_MONSTERS = 5;
+const NUM_MONSTERS = 10;
 const FRAME_RATE = 5;
 
 const LEVEL_WIDTH = 24;
@@ -42,6 +42,7 @@ function create(game) {
 	game.level = new Level(HARDCODED_LEVEL, HEIGHT_OFFSET);
 	game.player = new Player(FRAME_RATE);
 	game.level.placeRandomly(game.player);
+	game.level.setTarget(game.player);
 	for(var i=0; i<NUM_MONSTERS; i++) {
 		const monster = new Monster();
 		game.level.placeRandomly(monster);
@@ -55,7 +56,9 @@ function update(game) {
 }
 
 function onKeyPress(direction) {
-	game.player.move(game.level, direction);
+	if(!game.player.move(game.level, direction)) {
+		return;
+	}
 	for(var i = monsters.length-1; i>=0; i--){
 		const monster = monsters[i];
 		if(monster.health > 0){
@@ -65,12 +68,32 @@ function onKeyPress(direction) {
 				location.reload();
 			}
 		} else {
-			game.level.remove(monster);
-			monsters.splice(i, 1);
-			if(monsters.length==0) {
-				alert("you win!");
-				location.reload();
-			}
+			remove(monster);
+		}
+	}
+}
+
+function remove(monster) {
+	game.level.remove(monster);
+	const index = monsters.indexOf(monster);
+	monsters.splice(index, 1);
+	if(monsters.length==0) {
+		alert("you win!");
+		location.reload();
+	}
+}
+
+function onDotClicked(x, y) {
+	const target = game.level.grid[y-HEIGHT_OFFSET][x];
+	if(target===game.player && game.player.magic > 0) {
+		game.level.remove(game.player);
+		game.level.placeRandomly(game.player);
+		game.player.magic--;
+	} else if (target.health){
+		target.health-=2;
+		game.player.magic--;
+		if(target.health <=0) {
+			remove(target);
 		}
 	}
 }
@@ -79,6 +102,7 @@ let config = {
 	create: create,
 	update: update,
 	onKeyPress: onKeyPress,
+	onDotClicked: onDotClicked,
 	frameRate: FRAME_RATE,
 	clearGrid: false
 };

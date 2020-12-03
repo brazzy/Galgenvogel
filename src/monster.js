@@ -4,7 +4,7 @@ class Monster {
 	constructor() {
 		this.spotTaken = true,
 		this.color = Color.Yellow
-		this.health=1;
+		this.health=2;
 		this.x = null;
 		this.y = null;
 	}
