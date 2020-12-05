@@ -5,6 +5,7 @@
   "homepage": "https://github.com/brazzy/Galgenvogel",
   "description": "A minimal roguelike game based on the 24a2 framework",
   "version": "0.0.1",
+  "author": "Michael Borgwardt <michael@borgwardt.de>",
   "license": "MIT",
   "devDependencies": {
     "jest": "^26.6"
