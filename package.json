@@ -2,6 +2,8 @@
   "type": "module",
   "main": "src/Galgenvogel.js",
   "name": "Galgenvogel",
+  "homepage": "https://github.com/brazzy/Galgenvogel",
+  "description": "A minimal roguelike game based on the 24a2 framework",
   "version": "0.0.1",
   "license": "MIT",
   "devDependencies": {
