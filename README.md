@@ -4,6 +4,8 @@
 
 A minimalist Roguelike game using the [24a2](https://github.com/jamesroutley/24a2) framework.
 
+Try it out here: https://brazzy.de/Galgenvogel/
+
 Design goals: 
 
 * no text, communicate game state exclusively through the grid of colored dots.
