@@ -34,75 +34,82 @@ const HARDCODED_LEVEL = [
 [1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1]
 ];
 
-
-const monsters = [];
-
-
-function create(game) {
-	game.level = new Level(HARDCODED_LEVEL, HEIGHT_OFFSET);
-	game.player = new Player(FRAME_RATE);
-	game.level.placeRandomly(game.player);
-	game.level.setTarget(game.player);
-	for(var i=0; i<NUM_MONSTERS; i++) {
-		const monster = new Monster();
-		game.level.placeRandomly(monster);
-		monsters.push(monster);
-	}		
-}
-
-function update(game) {
-	game.player.paintStatus(game, LEVEL_WIDTH);
-	game.level.paint(game);
-}
-
-function onKeyPress(direction) {
-	if(!game.player.move(game.level, direction)) {
-		return;
+class Galgenvogel {
+	constructor() {
+		this.level = null;
+		this.player = new Player(FRAME_RATE);
+		this.game = null;
+		this.monsters = [];
 	}
-	for(var i = monsters.length-1; i>=0; i--){
-		const monster = monsters[i];
-		if(monster.health > 0){
-			monster.move(game.level);
-			if(game.player.health <= 0) {
-				alert("you lose!");				
-				location.reload();
+	
+	init(game) {
+		this.game = game;
+		this.level = new Level(HARDCODED_LEVEL, HEIGHT_OFFSET);
+		this.level.placeRandomly(this.player);
+		this.level.setTarget(this.player);
+		for(var i=0; i<NUM_MONSTERS; i++) {
+			const monster = new Monster();
+			this.level.placeRandomly(monster);
+			this.monsters.push(monster);
+		}				
+	}
+
+	update(game) {
+		this.player.paintStatus(this.game, LEVEL_WIDTH);
+		this.level.paint(this.game);
+	}
+
+	onKeyPress(direction) {
+		if(!this.player.move(this.level, direction)) {
+			return;
+		}
+		for(var i = this.monsters.length-1; i>=0; i--){
+			const monster = this.monsters[i];
+			if(monster.health > 0){
+				monster.move(this.level);
+				if(this.player.health <= 0) {
+					alert("you lose!");				
+					this.init();
+				}
+			} else {
+				this.remove(monster);
 			}
-		} else {
-			remove(monster);
+		}
+	}
+
+	remove(monster) {
+		this.level.remove(monster);
+		const index = this.monsters.indexOf(monster);
+		this.monsters.splice(index, 1);
+		if(this.monsters.length==0) {
+			alert("you win!");
+			location.reload();
+		}
+	}
+
+	onDotClicked(x, y) {
+		const target = this.level.grid[y-HEIGHT_OFFSET][x];
+		if(target===this.player && this.player.magic > 0) {
+			this.level.remove(this.player);
+			this.level.placeRandomly(this.player);
+			this.player.magic--;
+		} else if (target.health){
+			target.health-=2;
+			this.player.magic--;
+			if(target.health <=0) {
+				this.remove(target);
+			}
 		}
 	}
 }
 
-function remove(monster) {
-	game.level.remove(monster);
-	const index = monsters.indexOf(monster);
-	monsters.splice(index, 1);
-	if(monsters.length==0) {
-		alert("you win!");
-		location.reload();
-	}
-}
-
-function onDotClicked(x, y) {
-	const target = game.level.grid[y-HEIGHT_OFFSET][x];
-	if(target===game.player && game.player.magic > 0) {
-		game.level.remove(game.player);
-		game.level.placeRandomly(game.player);
-		game.player.magic--;
-	} else if (target.health){
-		target.health-=2;
-		game.player.magic--;
-		if(target.health <=0) {
-			remove(target);
-		}
-	}
-}
+var galgenvogel = new Galgenvogel();
 
 let config = {
-	create: create,
-	update: update,
-	onKeyPress: onKeyPress,
-	onDotClicked: onDotClicked,
+	create: galgenvogel.init.bind(galgenvogel),
+	update: galgenvogel.update.bind(galgenvogel),
+	onKeyPress: galgenvogel.onKeyPress.bind(galgenvogel),
+	onDotClicked: galgenvogel.onDotClicked.bind(galgenvogel),
 	frameRate: FRAME_RATE,
 	clearGrid: false
 };

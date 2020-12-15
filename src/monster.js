@@ -2,8 +2,8 @@ import { Color, Direction } from './engine-types.js';
 
 class Monster {
 	constructor() {
-		this.spotTaken = true,
-		this.color = Color.Yellow
+		this.spotTaken = true;
+		this.color = Color.Yellow;
 		this.health=2;
 		this.x = null;
 		this.y = null;
