@@ -105,6 +105,10 @@ class Level {
 		}
 	}
 	
+	distanceToTarget(being) {
+		return this.targetDistances[being.y][being.x];
+	}
+	
 	/**
 	 * Returns null if move was successful, blocking entity otherwise
 	 */

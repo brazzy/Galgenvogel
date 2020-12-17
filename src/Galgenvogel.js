@@ -48,7 +48,7 @@ class Galgenvogel {
 		this.level.placeRandomly(this.player);
 		this.level.setTarget(this.player);
 		for(var i=0; i<NUM_MONSTERS; i++) {
-			const monster = new Monster();
+			const monster = (i%4) ? new Monster(Color.Yellow, 2, 1, 100) : new Monster(Color.Orange, 5, 2, 10);				
 			this.level.placeRandomly(monster);
 			this.monsters.push(monster);
 		}				
