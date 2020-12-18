@@ -88,16 +88,18 @@ class Galgenvogel {
 	}
 
 	onDotClicked(x, y) {
-		const target = this.level.grid[y-HEIGHT_OFFSET][x];
-		if(target===this.player && this.player.magic > 0) {
-			this.level.remove(this.player);
-			this.level.placeRandomly(this.player);
-			this.player.magic--;
-		} else if (target.health){
-			target.health-=2;
-			this.player.magic--;
-			if(target.health <=0) {
-				this.remove(target);
+		if(this.player.magic > 0) {
+			const target = this.level.grid[y-HEIGHT_OFFSET][x];
+			if(target===this.player) {
+				this.level.remove(this.player);
+				this.level.placeRandomly(this.player);
+				this.player.magic--;
+			} else if (target.health){
+				target.health-=2;
+				this.player.magic--;
+				if(target.health <=0) {
+					this.remove(target);
+				}
 			}
 		}
 	}
