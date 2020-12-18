@@ -44,6 +44,7 @@ class Galgenvogel {
 	
 	init(game) {
 		this.game = game;
+		this.monsters = [];
 		this.level = new Level(HARDCODED_LEVEL, HEIGHT_OFFSET);
 		this.level.placeRandomly(this.player);
 		this.level.setTarget(this.player);
@@ -68,8 +69,9 @@ class Galgenvogel {
 			if(monster.health > 0){
 				monster.move(this.level);
 				if(this.player.health <= 0) {
-					alert("you lose!");				
-					this.init();
+					alert("you lose!");
+					this.player.init();
+					this.init(this.game);
 				}
 			} else {
 				this.remove(monster);
@@ -83,7 +85,7 @@ class Galgenvogel {
 		this.monsters.splice(index, 1);
 		if(this.monsters.length==0) {
 			alert("you win!");
-			location.reload();
+			this.init(this.game);
 		}
 	}
 

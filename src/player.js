@@ -9,13 +9,9 @@ class Player {
 		
 		this.isPlayer = true;
 		this.spotTaken = true;
-		this.healCounter = HEAL_DELAY;
-		this.health=3;
-		this.maxHealth=5;
-		this.magic = 1;
-		this.maxMagic=2;		
 		this.x=null;
 		this.y=null;
+		this.init();
 	}
 
 	get color() {
@@ -26,6 +22,14 @@ class Player {
 			this._colorCount--
 			return Color.Green;
 		}
+	}
+	
+	init() {
+		this.healCounter = HEAL_DELAY;
+		this.health=3;
+		this.maxHealth=5;
+		this.magic = 1;
+		this.maxMagic=2;				
 	}
 	
 	move(level, direction) {
