@@ -46,11 +46,16 @@ function finishLevel(won) {
 	this.init(this.game);
 }
 
+function generateMonster(index) {
+	return (index%4) ? new Monster(Color.Yellow, 2, 1, 100) : new Monster(Color.Orange, 5, 2, 10);		
+}
+
 class Galgenvogel {
-	constructor(levelGenerator = () => HARDCODED_LEVEL, numMonsters = NUM_MONSTERS, random = randomCoords, finish = finishLevel) {
+	constructor(levelGenerator = () => HARDCODED_LEVEL, numMonsters = NUM_MONSTERS, random = randomCoords, finish = finishLevel, monsterGenerator = generateMonster) {
 		this.level = null;
 		this.levelGenerator = levelGenerator;
 		this.finish = finish;
+		this.monsterGenerator = monsterGenerator;
 		this.player = new Player(FRAME_RATE);
 		this.game = null;
 		this.random = random;
@@ -65,7 +70,7 @@ class Galgenvogel {
 		this.level.placeRandomly(this.player);
 		this.level.setTarget(this.player);
 		for(var i=0; i<this.numMonsters; i++) {
-			const monster = (i%4) ? new Monster(Color.Yellow, 2, 1, 100) : new Monster(Color.Orange, 5, 2, 10);				
+			const monster = this.monsterGenerator(i);				
 			this.level.placeRandomly(monster);
 			this.monsters.push(monster);
 		}				
