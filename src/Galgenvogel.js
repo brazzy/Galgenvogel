@@ -36,11 +36,12 @@ const HARDCODED_LEVEL = [
 ];
 
 class Galgenvogel {
-	constructor(levelGenerator = () => HARDCODED_LEVEL) {
+	constructor(levelGenerator = () => HARDCODED_LEVEL, numMonsters = NUM_MONSTERS) {
 		this.level = null;
 		this.levelGenerator = levelGenerator;
 		this.player = new Player(FRAME_RATE);
 		this.game = null;
+		this.numMonsters = numMonsters;
 		this.monsters = [];
 	}
 	
@@ -50,7 +51,7 @@ class Galgenvogel {
 		this.level = new Level(this.levelGenerator(), HEIGHT_OFFSET);
 		this.level.placeRandomly(this.player);
 		this.level.setTarget(this.player);
-		for(var i=0; i<NUM_MONSTERS; i++) {
+		for(var i=0; i<this.numMonsters; i++) {
 			const monster = (i%4) ? new Monster(Color.Yellow, 2, 1, 100) : new Monster(Color.Orange, 5, 2, 10);				
 			this.level.placeRandomly(monster);
 			this.monsters.push(monster);
