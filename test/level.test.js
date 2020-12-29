@@ -61,15 +61,15 @@ describe('pathfinding algorithm', () => {
 describe('placeRandomly', () => {
 	
 	test('works', () => {
-		const level = new Level([[0,0,0],[0,0,0],[0,0,0]], 0);
+		// workaround
+		const randomCoords = jest.fn();
+		randomCoords.mockImplementation( () => [DEFAULT_X, DEFAULT_Y] );
+		const level = new Level([[0,0,0],[0,0,0],[0,0,0]], 0, randomCoords);
 		const being = { x: null, y: null }
 
-		// workaround
-		level.randomCoords = jest.fn();
-		level.randomCoords.mockImplementation( () => [DEFAULT_X, DEFAULT_Y] );
 
 		level.placeRandomly(being);
-		expect(level.randomCoords).toHaveBeenCalledTimes(1);
+		expect(randomCoords).toHaveBeenCalledTimes(1);
 		expect(being.x).toBe(DEFAULT_X);
 		expect(being.y).toBe(DEFAULT_Y);
 		expect(level.grid[DEFAULT_Y][DEFAULT_X]).toBe(being);

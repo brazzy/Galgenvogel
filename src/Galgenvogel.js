@@ -1,6 +1,7 @@
 import { Level } from './level.js';
 import { Player } from './player.js';
 import { Monster } from './monster.js';
+import { randomCoords } from './random.js';
 
 const FRAME_RATE = 5;
 
@@ -36,11 +37,12 @@ const HARDCODED_LEVEL = [
 ];
 
 class Galgenvogel {
-	constructor(levelGenerator = () => HARDCODED_LEVEL, numMonsters = NUM_MONSTERS) {
+	constructor(levelGenerator = () => HARDCODED_LEVEL, numMonsters = NUM_MONSTERS, random = randomCoords) {
 		this.level = null;
 		this.levelGenerator = levelGenerator;
 		this.player = new Player(FRAME_RATE);
 		this.game = null;
+		this.random = random;
 		this.numMonsters = numMonsters;
 		this.monsters = [];
 	}
@@ -48,7 +50,7 @@ class Galgenvogel {
 	init(game) {
 		this.game = game;
 		this.monsters = [];
-		this.level = new Level(this.levelGenerator(), HEIGHT_OFFSET);
+		this.level = new Level(this.levelGenerator(), HEIGHT_OFFSET, this.random);
 		this.level.placeRandomly(this.player);
 		this.level.setTarget(this.player);
 		for(var i=0; i<this.numMonsters; i++) {

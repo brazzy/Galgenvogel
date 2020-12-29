@@ -1,5 +1,4 @@
 import { Color, Direction } from './engine-types.js';
-import { randomCoords } from './random.js';
 
 const WALL = {
 	color: Color.Black,
@@ -12,11 +11,11 @@ const EMPTY = {
 }
 
 class Level {
-	constructor(wallGrid, heightOffset){
+	constructor(wallGrid, heightOffset, random){
 		this.width = wallGrid[0].length;
 		this.height = wallGrid.length;
 		this.heightOffset = heightOffset;
-		this.randomCoords = randomCoords; // workaround so we can mock it, see level.test.js
+		this.random = random; // workaround so we can mock it, see level.test.js
 		this.grid = [];
 		this.targetDistances = [];
 		for(var i=0; i<this.height; i++) {
@@ -30,7 +29,7 @@ class Level {
 	placeRandomly(being) {
 		var x,y;
 		do {
-			[x, y] = this.randomCoords(this.width, this.height);
+			[x, y] = this.random(this.width, this.height);
 		} while (this.grid[y][x].spotTaken)
 		this.grid[y][x] = being;
 		being.x = x;
