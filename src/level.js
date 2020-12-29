@@ -16,6 +16,7 @@ class Level {
 		this.width = wallGrid[0].length;
 		this.height = wallGrid.length;
 		this.heightOffset = heightOffset;
+		this.randomCoords = randomCoords; // workaround so we can mock it, see level.test.js
 		this.grid = [];
 		this.targetDistances = [];
 		for(var i=0; i<this.height; i++) {
@@ -27,9 +28,9 @@ class Level {
 	}
 	
 	placeRandomly(being) {
-		var x,y;	
+		var x,y;
 		do {
-			[x, y] = randomCoords(this.width, this.height);
+			[x, y] = this.randomCoords(this.width, this.height);
 		} while (this.grid[y][x].spotTaken)
 		this.grid[y][x] = being;
 		being.x = x;

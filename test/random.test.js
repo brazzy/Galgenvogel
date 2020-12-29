@@ -27,7 +27,6 @@ describe('randomInt', () => {
 		for (let i=0; i<1000; i++) {
 			results[randomInt(10)]++;			
 		}
-		console.log(results);
 		expect(results.length).toBe(10);
 		expect(results.length).not.toContain(0);
 		expect(results.length).not.toContain(1);
