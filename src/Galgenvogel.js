@@ -36,10 +36,21 @@ const HARDCODED_LEVEL = [
 [1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1]
 ];
 
+function finishLevel(won) {
+	if(won) {		
+		alert("you win!");
+	} else {
+		alert("you lose!");
+		this.player.init();
+	}
+	this.init(this.game);
+}
+
 class Galgenvogel {
-	constructor(levelGenerator = () => HARDCODED_LEVEL, numMonsters = NUM_MONSTERS, random = randomCoords) {
+	constructor(levelGenerator = () => HARDCODED_LEVEL, numMonsters = NUM_MONSTERS, random = randomCoords, finish = finishLevel) {
 		this.level = null;
 		this.levelGenerator = levelGenerator;
+		this.finish = finish;
 		this.player = new Player(FRAME_RATE);
 		this.game = null;
 		this.random = random;
@@ -74,9 +85,7 @@ class Galgenvogel {
 			if(monster.health > 0){
 				monster.move(this.level);
 				if(this.player.health <= 0) {
-					alert("you lose!");
-					this.player.init();
-					this.init(this.game);
+					this.finish(false);
 				}
 			} else {
 				this.remove(monster);
@@ -89,8 +98,7 @@ class Galgenvogel {
 		const index = this.monsters.indexOf(monster);
 		this.monsters.splice(index, 1);
 		if(this.monsters.length==0) {
-			alert("you win!");
-			this.init(this.game);
+			this.finish(true);
 		}
 	}
 
