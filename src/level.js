@@ -1,4 +1,5 @@
 import { Color, Direction } from './engine-types.js';
+import { randomCoords } from './random.js';
 
 const WALL = {
 	color: Color.Black,
@@ -28,8 +29,7 @@ class Level {
 	placeRandomly(being) {
 		var x,y;	
 		do {
-			y = Math.floor(Math.random()*this.height);
-			x = Math.floor(Math.random()*this.width);
+			[x, y] = randomCoords(this.width, this.height);
 		} while (this.grid[y][x].spotTaken)
 		this.grid[y][x] = being;
 		being.x = x;
