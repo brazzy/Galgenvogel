@@ -2,13 +2,14 @@ import { Level } from './level.js';
 import { Player } from './player.js';
 import { Monster } from './monster.js';
 
-const NUM_MONSTERS = 10;
 const FRAME_RATE = 5;
 
-const LEVEL_WIDTH = 24;
-const LEVEL_HEIGHT = 22;
+// needed to display stats, so level height must be 2 smaller than grid height.
 const HEIGHT_OFFSET = 2;
 
+const NUM_MONSTERS = 10;
+
+// grid size of 24 is the engine default, we stick with it for now
 const HARDCODED_LEVEL = [
 [1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1],
 [1,1,0,0,0,0,1,1,1,1,0,0,0,1,1,1,1,0,0,0,0,0,1,1],
@@ -35,8 +36,9 @@ const HARDCODED_LEVEL = [
 ];
 
 class Galgenvogel {
-	constructor() {
+	constructor(levelGenerator = () => HARDCODED_LEVEL) {
 		this.level = null;
+		this.levelGenerator = levelGenerator;
 		this.player = new Player(FRAME_RATE);
 		this.game = null;
 		this.monsters = [];
@@ -45,7 +47,7 @@ class Galgenvogel {
 	init(game) {
 		this.game = game;
 		this.monsters = [];
-		this.level = new Level(HARDCODED_LEVEL, HEIGHT_OFFSET);
+		this.level = new Level(this.levelGenerator(), HEIGHT_OFFSET);
 		this.level.placeRandomly(this.player);
 		this.level.setTarget(this.player);
 		for(var i=0; i<NUM_MONSTERS; i++) {
@@ -56,7 +58,7 @@ class Galgenvogel {
 	}
 
 	update(game) {
-		this.player.paintStatus(this.game, LEVEL_WIDTH);
+		this.player.paintStatus(this.game, this.level.width);
 		this.level.paint(this.game);
 	}
 
