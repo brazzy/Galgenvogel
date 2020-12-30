@@ -125,4 +125,4 @@ class Galgenvogel {
 	}
 }
 
-export {Galgenvogel, FRAME_RATE}
+export {Galgenvogel, FRAME_RATE, HEIGHT_OFFSET}
