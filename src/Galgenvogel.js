@@ -2,6 +2,7 @@ import { Level } from './level.js';
 import { Player } from './player.js';
 import { Monster } from './monster.js';
 import { randomCoords } from './random.js';
+import { Color, Direction } from '../src/engine-types.js';
 
 const FRAME_RATE = 5;
 
@@ -36,49 +37,45 @@ const HARDCODED_LEVEL = [
 [1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1]
 ];
 
-function finishLevel(won) {
-	if(won) {		
-		alert("you win!");
-	} else {
-		alert("you lose!");
-		this.player.init();
-	}
-	this.init(this.game);
-}
-
-function generateMonster(index) {
-	return (index%4) ? new Monster(Color.Yellow, 2, 1, 100) : new Monster(Color.Orange, 5, 2, 10);		
-}
-
 class Galgenvogel {
-	constructor(levelGenerator = () => HARDCODED_LEVEL, numMonsters = NUM_MONSTERS, random = randomCoords, finish = finishLevel, monsterGenerator = generateMonster) {
+	constructor(levelGenerator = () => HARDCODED_LEVEL, numMonsters = NUM_MONSTERS, random = randomCoords) {
 		this.level = null;
 		this.levelGenerator = levelGenerator;
-		this.finish = finish;
-		this.monsterGenerator = monsterGenerator;
 		this.player = new Player(FRAME_RATE);
-		this.game = null;
 		this.random = random;
 		this.numMonsters = numMonsters;
 		this.monsters = [];
 	}
 	
-	init(game) {
-		this.game = game;
+	init() {
 		this.monsters = [];
 		this.level = new Level(this.levelGenerator(), HEIGHT_OFFSET, this.random);
 		this.level.placeRandomly(this.player);
 		this.level.setTarget(this.player);
 		for(var i=0; i<this.numMonsters; i++) {
-			const monster = this.monsterGenerator(i);				
+			const monster = this.generateMonster(i);				
 			this.level.placeRandomly(monster);
 			this.monsters.push(monster);
 		}				
 	}
 
+	generateMonster(index) {
+		return (index%4) ? new Monster(Color.Yellow, 2, 1, 100) : new Monster(Color.Orange, 5, 2, 10);		
+	}
+
+	finishLevel(won) {
+		if(won) {		
+			alert("you win!");
+		} else {
+			alert("you lose!");
+			this.player.init();
+		}
+		this.init();
+	}
+
 	update(game) {
-		this.player.paintStatus(this.game, this.level.width);
-		this.level.paint(this.game);
+		this.player.paintStatus(game, this.level.width);
+		this.level.paint(game);
 	}
 
 	onKeyPress(direction) {
@@ -90,7 +87,7 @@ class Galgenvogel {
 			if(monster.health > 0){
 				monster.move(this.level);
 				if(this.player.health <= 0) {
-					this.finish(false);
+					this.finishLevel(false);
 				}
 			} else {
 				this.remove(monster);
@@ -103,7 +100,7 @@ class Galgenvogel {
 		const index = this.monsters.indexOf(monster);
 		this.monsters.splice(index, 1);
 		if(this.monsters.length==0) {
-			this.finish(true);
+			this.finishLevel(true);
 		}
 	}
 
@@ -125,4 +122,4 @@ class Galgenvogel {
 	}
 }
 
-export {Galgenvogel, FRAME_RATE, HEIGHT_OFFSET}
+export {Galgenvogel, FRAME_RATE, HEIGHT_OFFSET, NUM_MONSTERS}

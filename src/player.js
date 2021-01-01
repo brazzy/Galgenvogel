@@ -1,6 +1,11 @@
 import { Color, Direction } from './engine-types.js';
 
 const HEAL_DELAY = 10;
+const HEALTH_START = 3;
+const HEALTH_MAX = 5;
+const MAGIC_START = 1;
+const MAGIC_MAX = 2;
+
 
 class Player {
 	constructor(colorCycle){
@@ -26,10 +31,10 @@ class Player {
 	
 	init() {
 		this.healCounter = HEAL_DELAY;
-		this.health=3;
-		this.maxHealth=5;
-		this.magic = 1;
-		this.maxMagic=2;				
+		this.health=HEALTH_START;
+		this.maxHealth=HEALTH_MAX;
+		this.magic = MAGIC_START;
+		this.maxMagic=MAGIC_MAX;
 	}
 	
 	move(level, direction) {
@@ -47,14 +52,12 @@ class Player {
 			result = true;
 		}
 		if(result) {
-			if(this.healCounter == 0){
+			if(--this.healCounter == 0){
 				if(this.health < this.maxHealth)
 					this.health++;
 				if(this.magic < this.maxMagic)
 					this.magic++;
 				this.healCounter = HEAL_DELAY;
-			} else {
-				this.healCounter--;
 			}
 		}
 		return result;
@@ -66,23 +69,20 @@ class Player {
 			game.setDot(i, 1, Color.Black);	  
 		}
 		for(var i=0; i<width; i++) {
-			game.setDot(i, 0, Color.Black);
-				
-			if(i<this.maxHealth) {
-				game.setDot(i, 0, Color.Gray);
-			}
 			if(i<this.health) {
 				game.setDot(i, 0, Color.Red);
+			} else if(i<this.maxHealth) {
+				game.setDot(i, 0, Color.Gray);
+			} else if(width-i <= this.magic) {
+				game.setDot(i, 0, Color.Blue);
+			} else if(width-i <= this.maxMagic) {
+				game.setDot(i, 0, Color.Gray);
+			} else {
+				game.setDot(i, 0, Color.Black);				
 			}
 
-			if(width-i <= this.maxMagic) {
-				game.setDot(i, 0, Color.Gray);
-			}
-			if(width-i <= this.magic) {
-				game.setDot(i, 0, Color.Blue);
-			}
 		}
 	}
 }
 
-export {Player}
+export {Player, HEAL_DELAY, HEALTH_START, HEALTH_MAX, MAGIC_START, MAGIC_MAX}
