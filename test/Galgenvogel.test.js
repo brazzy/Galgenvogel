@@ -6,6 +6,12 @@ import { jest } from '@jest/globals';
 
 const NO_WALLS = [[0,0,0], [0,0,0], [0,0,0]];
 
+
+beforeEach(() => {    
+	jest.clearAllMocks();
+	jest.spyOn(window, 'alert').mockImplementation(() => {});
+});
+
 describe('smoketest', () => {	
 	test('default initialization', () => {
 		const gv = new Galgenvogel();
@@ -144,26 +150,35 @@ describe('movement', () => {
 		expect(gv.player.y).toBe(2);
 	});
 
-	test('monster follows', () => {
+	test('monster follows with limited perception range', () => {
 		const randomCoords = jest.fn();
 		randomCoords
 			.mockImplementationOnce( () => [0,0] )
-			.mockImplementationOnce( () => [1,0] );
-		const finish = jest.fn();
-		const gv = new Galgenvogel(() => NO_WALLS, 1, randomCoords, finish);
+			.mockImplementationOnce( () => [2,2] );
+		const gv = new Galgenvogel(() => [[0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0]], 1, randomCoords);
+		gv.generateMonster = () => new Monster(Color.Orange, 1, 1, 2);
 
 		gv.init();
 		expect(gv.player.x).toBe(0);
 		expect(gv.player.y).toBe(0);
 		expect(gv.monsters.length).toBe(1);
-		expect(gv.monsters[0].x).toBe(1);
-		expect(gv.monsters[0].y).toBe(0);
+		expect(gv.monsters[0].x).toBe(2);
+		expect(gv.monsters[0].y).toBe(2);
 		
-		gv.onKeyPress(Direction.Down);
-		expect(gv.player.x).toBe(0);
-		expect(gv.player.y).toBe(1);
+		// outside perception range
+		gv.onKeyPress(Direction.Right);
+		expect(gv.player.x).toBe(1);
+		expect(gv.player.y).toBe(0);
 		expect(gv.monsters.length).toBe(1);
-		expect(gv.monsters[0].x).toBe(1);
+		expect(gv.monsters[0].x).toBe(2);
+		expect(gv.monsters[0].y).toBe(2);
+		
+		// inside perception range
+		gv.onKeyPress(Direction.Right);
+		expect(gv.player.x).toBe(2);
+		expect(gv.player.y).toBe(0);
+		expect(gv.monsters.length).toBe(1);
+		expect(gv.monsters[0].x).toBe(2);
 		expect(gv.monsters[0].y).toBe(1);
 	});
 });
@@ -211,7 +226,6 @@ describe('melee', () => {
 		randomCoords
 			.mockImplementationOnce( () => [1,1] )
 			.mockImplementationOnce( () => [2,1] );
-		jest.spyOn(window, 'alert').mockImplementation(() => {});
 		const gv = new Galgenvogel(() => NO_WALLS, 1, randomCoords);
 		gv.generateMonster = () => new Monster(Color.Orange, 2, 1, 10);
 
@@ -233,24 +247,32 @@ describe('melee', () => {
 		expect(gv.monsters[0].health).toBe(1);
 	});
 	
-	test('kill monster and win', () => {
+	test('kill monsters and win', () => {
 		const randomCoords = jest.fn();
 		randomCoords
 			.mockImplementationOnce( () => [1,1] )
+			.mockImplementationOnce( () => [0,1] )
 			.mockImplementationOnce( () => [2,1] );
-		jest.spyOn(window, 'alert').mockImplementation(() => {});
-		const gv = new Galgenvogel(() => NO_WALLS, 1, randomCoords);
+		const gv = new Galgenvogel(() => NO_WALLS, 2, randomCoords);
 		gv.generateMonster = () => new Monster(Color.Orange, 1, 1, 10);
 
 		gv.init();
 		expect(gv.player.health).toBe(HEALTH_START);
-		expect(gv.monsters.length).toBe(1);
+		expect(gv.monsters.length).toBe(2);
 		expect(gv.monsters[0].health).toBe(1);
+		expect(gv.monsters[1].health).toBe(1);
 		
 		gv.init = jest.fn();
 		gv.player.init = jest.fn();
 		gv.onKeyPress(Direction.Right);
-		expect(gv.player.health).toBe(HEALTH_START);
+		expect(gv.player.health).toBe(HEALTH_START-1);
+		expect(gv.monsters.length).toBe(1);
+		expect(window.alert).not.toHaveBeenCalled();
+		expect(gv.init).not.toHaveBeenCalled();
+		expect(gv.player.init).not.toHaveBeenCalled();
+		
+		gv.onKeyPress(Direction.Left);
+		expect(gv.player.health).toBe(HEALTH_START-1);
 		expect(gv.monsters.length).toBe(0);
 		expect(window.alert).toHaveBeenCalledWith("you win!");
 		expect(gv.init).toHaveBeenCalled();
@@ -262,7 +284,6 @@ describe('melee', () => {
 		randomCoords
 			.mockImplementationOnce( () => [1,1] )
 			.mockImplementationOnce( () => [2,1] );
-		jest.spyOn(window, 'alert').mockImplementation(() => {});
 		const gv = new Galgenvogel(() => NO_WALLS, 1, randomCoords);
 		gv.generateMonster = () => new Monster(Color.Orange, 5, 3, 10);
 
@@ -284,25 +305,53 @@ describe('melee', () => {
 });
 
 describe('magic', () => {
+	test('does not work on walls', () => {
+		const randomCoords = jest.fn();
+		randomCoords
+			.mockImplementationOnce( () => [0,0] );
+		const gv = new Galgenvogel(() => [[0,0],[0,1]], 0, randomCoords);
+
+		gv.init();
+		expect(gv.player.magic).toBe(1);		
+
+		gv.onDotClicked(1, 1+HEIGHT_OFFSET);
+		expect(gv.player.health).toBe(HEALTH_START);
+		expect(gv.player.magic).toBe(1);		
+		expect(gv.player.x).toBe(0);
+		expect(gv.player.y).toBe(0);
+		expect(window.alert).not.toHaveBeenCalled();
+		
+	});
+	
 	test('kill monster with magic and win', () => {
 		const randomCoords = jest.fn();
 		randomCoords
 			.mockImplementationOnce( () => [1,1] )
 			.mockImplementationOnce( () => [2,1] );
-		jest.spyOn(window, 'alert').mockImplementation(() => {});
 		const gv = new Galgenvogel(() => NO_WALLS, 1, randomCoords);
-		gv.generateMonster = () => new Monster(Color.Orange, 1, 1, 10);
+		gv.generateMonster = () => new Monster(Color.Orange, 3, 1, 10);
 
 		gv.init();
-		expect(gv.player.health).toBe(HEALTH_START);
-		expect(gv.player.magic).toBe(1);
-		expect(gv.monsters.length).toBe(1);
-		expect(gv.monsters[0].health).toBe(1);
-		
+		gv.player.magic = 2;
 		gv.init = jest.fn();
 		gv.player.init = jest.fn();
+
+		expect(gv.player.health).toBe(HEALTH_START);
+		expect(gv.monsters.length).toBe(1);
+		expect(gv.monsters[0].health).toBe(3);
+		
 		gv.onDotClicked(2, 1+HEIGHT_OFFSET);
 		expect(gv.player.health).toBe(HEALTH_START);
+		expect(gv.monsters.length).toBe(1);
+		expect(gv.monsters[0].health).toBe(1);
+		expect(gv.player.magic).toBe(1);		
+		expect(window.alert).not.toHaveBeenCalled();
+		expect(gv.init).not.toHaveBeenCalled();
+		expect(gv.player.init).not.toHaveBeenCalled();			
+		
+		gv.onDotClicked(2, 1+HEIGHT_OFFSET);
+		expect(gv.player.health).toBe(HEALTH_START);
+		expect(gv.player.magic).toBe(0);
 		expect(gv.monsters.length).toBe(0);
 		expect(window.alert).toHaveBeenCalledWith("you win!");
 		expect(gv.init).toHaveBeenCalled();
@@ -325,4 +374,37 @@ describe('magic', () => {
 		expect(gv.player.y).toBe(1);
 	});
 
+	test('magic is limited', () => {
+		const randomCoords = jest.fn();
+		randomCoords
+			.mockImplementationOnce( () => [1,1] )
+			.mockImplementationOnce( () => [2,1] )
+			.mockImplementationOnce( () => [2,2] );
+		const gv = new Galgenvogel(() => NO_WALLS, 1, randomCoords);
+		gv.generateMonster = () => new Monster(Color.Orange, 1, 1, 10);
+
+
+		gv.init();
+		gv.init = jest.fn();
+		gv.player.init = jest.fn();
+		gv.player.magic = 0;
+
+		const checkEverythingUnchanged = () => {
+			expect(gv.player.x).toBe(1);
+			expect(gv.player.y).toBe(1);
+			expect(gv.player.health).toBe(HEALTH_START);
+			expect(gv.monsters.length).toBe(1);
+			expect(gv.monsters[0].health).toBe(1);
+			expect(window.alert).not.toHaveBeenCalled();
+			expect(gv.init).not.toHaveBeenCalled();
+			expect(gv.player.init).not.toHaveBeenCalled();			
+		};
+		checkEverythingUnchanged();
+		
+		gv.onDotClicked(2, 1+HEIGHT_OFFSET);
+		checkEverythingUnchanged(); // no damage
+
+		gv.onDotClicked(1, 1+HEIGHT_OFFSET);
+		checkEverythingUnchanged(); // no teleport
+	});
 });
