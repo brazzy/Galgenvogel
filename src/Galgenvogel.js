@@ -2,7 +2,7 @@ import { Level } from './level.js';
 import { Player } from './player.js';
 import { Monster } from './monster.js';
 import { randomCoords } from './random.js';
-import { Color, Direction } from '../src/engine-types.js';
+import { Color, Direction } from './engine-types.js';
 
 const FRAME_RATE = 5;
 
