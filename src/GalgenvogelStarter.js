@@ -13,5 +13,3 @@ let config = {
 
 let game = new Game(config);
 game.run();
-
-export {Galgenvogel}

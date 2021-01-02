@@ -8,12 +8,17 @@
   "author": "Michael Borgwardt <michael@borgwardt.de>",
   "license": "MIT",
   "devDependencies": {
-    "jest": "^26.6"
+    "@stryker-mutator/core": "^4.3.1",
+    "@stryker-mutator/jest-runner": "^4.3.1",
+    "jest": "^26.6.3"
   },
   "scripts": {
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+	"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+	"mutate": "stryker run"
   },
   "jest": {
-	"transform": {}
+    "transform": {},
+    "coverageDirectory": "reports/coverage",
+	"collectCoverageFrom": [ "src/*.js" ]
   }
 }

@@ -329,7 +329,7 @@ describe('magic', () => {
 			.mockImplementationOnce( () => [1,1] )
 			.mockImplementationOnce( () => [2,1] );
 		const gv = new Galgenvogel(() => NO_WALLS, 1, randomCoords);
-		gv.generateMonster = () => new Monster(Color.Orange, 3, 1, 10);
+		gv.generateMonster = () => new Monster(Color.Orange, 4, 1, 10);
 
 		gv.init();
 		gv.player.magic = 2;
@@ -338,12 +338,12 @@ describe('magic', () => {
 
 		expect(gv.player.health).toBe(HEALTH_START);
 		expect(gv.monsters.length).toBe(1);
-		expect(gv.monsters[0].health).toBe(3);
+		expect(gv.monsters[0].health).toBe(4);
 		
 		gv.onDotClicked(2, 1+HEIGHT_OFFSET);
 		expect(gv.player.health).toBe(HEALTH_START);
 		expect(gv.monsters.length).toBe(1);
-		expect(gv.monsters[0].health).toBe(1);
+		expect(gv.monsters[0].health).toBe(2);
 		expect(gv.player.magic).toBe(1);		
 		expect(window.alert).not.toHaveBeenCalled();
 		expect(gv.init).not.toHaveBeenCalled();
@@ -368,10 +368,12 @@ describe('magic', () => {
 		gv.init();
 		expect(gv.player.x).toBe(1);
 		expect(gv.player.y).toBe(1);
+		expect(gv.player.magic).toBe(1);
 		
 		gv.onDotClicked(1, 1+HEIGHT_OFFSET);
 		expect(gv.player.x).toBe(2);
 		expect(gv.player.y).toBe(1);
+		expect(gv.player.magic).toBe(0);
 	});
 
 	test('magic is limited', () => {
