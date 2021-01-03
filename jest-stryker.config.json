@@ -1,0 +1,5 @@
+{
+    "transform": {},
+    "coverageDirectory": "reports/coverage",
+	"collectCoverageFrom": [ "src/*.js", "!src/GalgenvogelStarter.js", "!src/engine-types.js" ],
+}

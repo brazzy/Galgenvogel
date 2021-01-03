@@ -1,0 +1,6 @@
+{
+	"transform": {},
+	"coverageDirectory": "reports/coverage",
+	"collectCoverageFrom": [ "src/*.js", "!src/GalgenvogelStarter.js", "!src/engine-types.js" ],
+	"testPathIgnorePatterns": [ ".stryker-tmp", "/node_modules/" ]
+}

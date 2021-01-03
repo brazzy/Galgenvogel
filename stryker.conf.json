@@ -6,11 +6,18 @@
     "clear-text",
     "progress"
   ],
+  "mutate": ["src/*.js", "!src/GalgenvogelStarter.js", "!src/engine-types.js"],
   "testRunner": "jest",
   "commandRunner": { "command": "node --experimental-vm-modules node_modules/jest/bin/jest.js" },
   "testRunnerNodeArgs": ["--experimental-vm-modules"],
   "coverageAnalysis": "off",
   "jest": {
-    "enableFindRelatedTests" : false
+    "enableFindRelatedTests" : false,
+	"configFile": "jest-stryker.config.json",
+	"config": {
+	  	"transform": {},
+		"coverageDirectory": "reports/coverage",
+		"collectCoverageFrom": [ "src/*.js", "!src/GalgenvogelStarter.js", "!src/engine-types.js" ]
+	}
   }
 }

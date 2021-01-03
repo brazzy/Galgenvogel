@@ -19,6 +19,7 @@ class Level {
 		this.grid = [];
 		this.targetDistances = [];
 		for(var i=0; i<this.height; i++) {
+			if(wallGrid[i].length != this.width) throw "irregular level shape in line " + i;
 			this.grid.push([]);
 			for(var j=0; j<this.width; j++) {
 				this.grid[i].push(wallGrid[i][j]==1 ? WALL : EMPTY);

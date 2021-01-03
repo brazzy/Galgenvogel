@@ -59,7 +59,6 @@ describe('pathfinding algorithm', () => {
 });
 
 describe('placeRandomly', () => {
-	
 	test('works', () => {
 		// workaround
 		const randomCoords = jest.fn();
@@ -73,5 +72,14 @@ describe('placeRandomly', () => {
 		expect(being.x).toBe(DEFAULT_X);
 		expect(being.y).toBe(DEFAULT_Y);
 		expect(level.grid[DEFAULT_Y][DEFAULT_X]).toBe(being);
+	});
+});
+
+describe('constructor', () => {
+	test('rejects irregular levels', () => {
+		const create = () => {
+			new Level([[0,0,0],[0,0],[0,0,0]], 0);
+		}
+		expect(create).toThrow("irregular level shape in line 1");
 	});
 });
