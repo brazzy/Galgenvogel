@@ -1,4 +1,4 @@
-import { Level } from './level.js';
+import { Level, HEIGHT_OFFSET, transpose } from './level.js';
 import { Player } from './player.js';
 import { Monster } from './monster.js';
 import { randomCoords } from './random.js';
@@ -6,12 +6,10 @@ import { Color, Direction } from './engine-types.js';
 
 const FRAME_RATE = 5;
 
-// needed to display stats, so level height must be 2 smaller than grid height.
-const HEIGHT_OFFSET = 2;
-
 const NUM_MONSTERS = 10;
 
-// grid size of 24 is the engine default, we stick with it for now
+// grid size of 24 is the engine default, we stick with it for now.
+// content is transposed to make it easier to edit visually.
 const HARDCODED_LEVEL = [
 [1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1],
 [1,1,0,0,0,0,1,1,1,1,0,0,0,1,1,1,1,0,0,0,0,0,1,1],
@@ -38,7 +36,7 @@ const HARDCODED_LEVEL = [
 ];
 
 class Galgenvogel {
-	constructor(levelGenerator = () => HARDCODED_LEVEL, numMonsters = NUM_MONSTERS, random = randomCoords) {
+	constructor(levelGenerator = () => transpose(HARDCODED_LEVEL), numMonsters = NUM_MONSTERS, random = randomCoords) {
 		this.level = null;
 		this.levelGenerator = levelGenerator;
 		this.player = new Player(FRAME_RATE);
@@ -49,7 +47,7 @@ class Galgenvogel {
 	
 	init() {
 		this.monsters = [];
-		this.level = new Level(this.levelGenerator(), HEIGHT_OFFSET, this.random);
+		this.level = new Level(this.levelGenerator(), this.random);
 		this.level.placeRandomly(this.player);
 		this.level.setTarget(this.player);
 		for(var i=0; i<this.numMonsters; i++) {
@@ -106,7 +104,7 @@ class Galgenvogel {
 
 	onDotClicked(x, y) {
 		if(this.player.magic > 0) {
-			const target = this.level.grid[y-HEIGHT_OFFSET][x];
+			const target = this.level.grid[x][y-HEIGHT_OFFSET];
 			if(target===this.player) {
 				this.level.remove(this.player);
 				this.level.placeRandomly(this.player);
@@ -122,4 +120,4 @@ class Galgenvogel {
 	}
 }
 
-export {Galgenvogel, FRAME_RATE, HEIGHT_OFFSET, NUM_MONSTERS}
+export {Galgenvogel, FRAME_RATE, NUM_MONSTERS}

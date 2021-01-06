@@ -65,20 +65,20 @@ class Player {
 
 	
 	paintStatus(game, width) {
-		for(var i=0; i<width; i++) {
-			game.setDot(i, 1, Color.Black);	  
+		for(var x=0; x<width; x++) {
+			game.setDot(x, 1, Color.Black);	  
 		}
-		for(var i=0; i<width; i++) {
-			if(i<this.health) {
-				game.setDot(i, 0, Color.Red);
-			} else if(i<this.maxHealth) {
-				game.setDot(i, 0, Color.Gray);
-			} else if(width-i <= this.magic) {
-				game.setDot(i, 0, Color.Blue);
-			} else if(width-i <= this.maxMagic) {
-				game.setDot(i, 0, Color.Gray);
+		for(var x=0; x<width; x++) {
+			if(x<this.health) {
+				game.setDot(x, 0, Color.Red);
+			} else if(x<this.maxHealth) {
+				game.setDot(x, 0, Color.Gray);
+			} else if(width-x <= this.magic) {
+				game.setDot(x, 0, Color.Blue);
+			} else if(width-x <= this.maxMagic) {
+				game.setDot(x, 0, Color.Gray);
 			} else {
-				game.setDot(i, 0, Color.Black);				
+				game.setDot(x, 0, Color.Black);				
 			}
 
 		}

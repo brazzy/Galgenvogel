@@ -1,5 +1,8 @@
 import { Color, Direction } from './engine-types.js';
 
+// needed to display stats, so level height must be 2 smaller than grid height.
+const HEIGHT_OFFSET = 2;
+
 const WALL = {
 	color: Color.Black,
 	spotTaken: true,
@@ -10,19 +13,26 @@ const EMPTY = {
 	spotTaken: false,
 }
 
+function transpose(level) { // for transposing the hardcoded level
+	return level[0].map((x,i) => level.map(x => x[i]));
+}
+
 class Level {
-	constructor(wallGrid, heightOffset, random){
-		this.width = wallGrid[0].length;
-		this.height = wallGrid.length;
-		this.heightOffset = heightOffset;
+	/**
+	 * First parameter is the level shape as an int array, with 0=empty and 1=wall.
+	 */
+	constructor(wallGrid, random){
+		this.height = wallGrid[0].length;
+		this.width = wallGrid.length;
+		this.heightOffset = HEIGHT_OFFSET; // workaround so we can change it, see level.test.js
 		this.random = random; // workaround so we can mock it, see level.test.js
 		this.grid = [];
 		this.targetDistances = [];
-		for(var i=0; i<this.height; i++) {
-			if(wallGrid[i].length != this.width) throw "irregular level shape in line " + i;
+		for(var x=0; x<this.width; x++) {
+			if(wallGrid[x].length != this.height) throw "irregular level shape in column " + x;
 			this.grid.push([]);
-			for(var j=0; j<this.width; j++) {
-				this.grid[i].push(wallGrid[i][j]==1 ? WALL : EMPTY);
+			for(var y=0; y<this.height; y++) {
+				this.grid[x].push(wallGrid[x][y]==1 ? WALL : EMPTY);
 			}
 		}
 	}
@@ -31,42 +41,42 @@ class Level {
 		var x,y;
 		do {
 			[x, y] = this.random(this.width, this.height);
-		} while (this.grid[y][x].spotTaken)
-		this.grid[y][x] = being;
+		} while (this.grid[x][y].spotTaken)
+		this.grid[x][y] = being;
 		being.x = x;
 		being.y = y;
 	}
 	
 	remove(being) {
-		this.grid[being.y][being.x] = EMPTY;
+		this.grid[being.x][being.y] = EMPTY;
 	}
 	
 	paint(game) {
-		for(var i=0; i<this.height; i++) {
-			for(var j=0; j<this.width; j++) {
-				game.setDot(j, i+this.heightOffset, this.grid[i][j].color);
+		for(var x=0; x<this.width; x++) {
+			for(var y=0; y<this.height; y++) {
+				game.setDot(x, y+this.heightOffset, this.grid[x][y].color);
 			}
 		}
 	}
 	
 	setTarget(player) {
 		const result = [];
-		for(var i=0; i<this.height; i++) {
+		for(var x=0; x<this.width; x++) {
 			result.push([]);
-			for(var j=0; j<this.width; j++) {
-				result[i].push(this.grid[i][j]===WALL ? NaN : +Infinity);
+			for(var y=0; y<this.height; y++) {
+				result[x].push(this.grid[x][y]===WALL ? NaN : +Infinity);
 			}
 		}
 
-		result[player.y][player.x] = 0;
+		result[player.x][player.y] = 0;
 		const toProcess = [[player.x, player.y]];
 		while(toProcess.length > 0) {
 			const [x,y] = toProcess.pop();
-			const currentDistance = result[y][x];
+			const currentDistance = result[x][y];
 			for(const direction of [Direction.Up, Direction.Down, Direction.Right, Direction.Left]) {
 				const [nextX, nextY] = this.step(x, y, direction);
-				if(result[nextY][nextX] > currentDistance+1) {
-					result[nextY][nextX] = currentDistance+1;
+				if(result[nextX][nextY] > currentDistance+1) {
+					result[nextX][nextY] = currentDistance+1;
 					toProcess.push([nextX, nextY]);					
 				}
 			}
@@ -95,11 +105,11 @@ class Level {
 	 */
 	move(being, direction) {
 		const [x, y] = this.step(being.x, being.y, direction);
-		if(this.grid[y][x].spotTaken) {
-			return this.grid[y][x];
+		if(this.grid[x][y].spotTaken) {
+			return this.grid[x][y];
 		} else {
 			this.remove(being);
-			this.grid[y][x] = being;
+			this.grid[x][y] = being;
 			being.x = x;
 			being.y = y;
 			return null;
@@ -107,17 +117,17 @@ class Level {
 	}
 	
 	distanceToTarget(being) {
-		return this.targetDistances[being.y][being.x];
+		return this.targetDistances[being.x][being.y];
 	}
 	
 	/**
 	 * Returns null if move was successful, blocking entity otherwise
 	 */
 	moveTowardsTarget(being) {
-		const currentDistance = this.targetDistances[being.y][being.x];
+		const currentDistance = this.targetDistances[being.x][being.y];
 		for(const direction of [Direction.Up, Direction.Down, Direction.Right, Direction.Left]) {
 			const [nextX, nextY] = this.step(being.x, being.y, direction);
-			if(this.targetDistances[nextY][nextX] < currentDistance) {
+			if(this.targetDistances[nextX][nextY] < currentDistance) {
 				return this.move(being, direction);
 			}
 		}
@@ -131,4 +141,4 @@ function normalize(value, max) {
 	return value;
 }
 
-export {Level}
+export {Level, HEIGHT_OFFSET, transpose}

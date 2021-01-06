@@ -1,6 +1,7 @@
-import { Galgenvogel, HEIGHT_OFFSET, NUM_MONSTERS } from '../src/Galgenvogel.js';
+import { Galgenvogel, NUM_MONSTERS } from '../src/Galgenvogel.js';
 import { Color, Direction } from '../src/engine-types.js';
 import { Monster } from '../src/monster.js';
+import { Level, HEIGHT_OFFSET } from '../src/level.js';
 import { HEAL_DELAY, HEALTH_START, HEALTH_MAX, MAGIC_START, MAGIC_MAX } from '../src/player.js';
 import { jest } from '@jest/globals';
 
@@ -21,7 +22,8 @@ describe('smoketest', () => {
 		expect(gv.player.magic).toBe(MAGIC_START);
 		expect(gv.level.width).toBe(24);
 		expect(gv.level.height).toBe(24-HEIGHT_OFFSET);
-		expect(gv.level.targetDistances.length).toBe(24-HEIGHT_OFFSET);
+		expect(gv.level.targetDistances.length).toBe(24);
+		expect(gv.level.targetDistances[0].length).toBe(24-HEIGHT_OFFSET);
 	});
 
 	test('default paint', () => {
@@ -31,7 +33,7 @@ describe('smoketest', () => {
 		gv.init();
 		gv.update(game);
 		expect(mock).toHaveBeenCalledTimes(24*24);
-	});
+	});	
 });
 
 describe('movement', () => {

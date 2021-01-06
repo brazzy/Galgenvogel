@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { Level } from '../src/level.js';
+import { Level, transpose } from '../src/level.js';
 
 // see https://stackoverflow.com/a/60669731/16883 - but fails with 
 // "randomCoords.mockImplementation is not a function"
@@ -19,42 +19,78 @@ import { Level } from '../src/level.js';
 const DEFAULT_X = 1;
 const DEFAULT_Y = 2;
 
+
+describe('transpose', () => {
+	test('works', () => {
+		const result = transpose([[1,0,1],
+		                          [0,0,0],
+								  [0,1,0]]);
+		expect(result).toMatchObject([[1,0,0],
+									  [0,0,1],
+									  [1,0,0]]);
+	});
+});
+
 describe('pathfinding algorithm', () => {
 	
 	test('computes basic distances', () => {
-		const level = new Level([[0,0,0],[0,0,0],[0,0,0]], 0);
+		const level = new Level([[0,0,0],
+								 [0,0,0],
+								 [0,0,0]]);
 		level.setTarget({x: 1, y: 1});
-		expect(level.targetDistances).toMatchObject ([[2,1,2],[1,0,1],[2,1,2]]);
+		expect(level.targetDistances).toMatchObject([[2,1,2],
+													 [1,0,1],
+													 [2,1,2]]);
 	});
 
 	test('recognizes walls', () => {
-		const level = new Level([[1,0,1],[0,0,0],[1,0,1]], 0);
+		const level = new Level([[1,0,1],
+								 [0,0,0],
+								 [1,0,1]]);
 		level.setTarget({x: 1, y: 1});
-		expect(level.targetDistances).toMatchObject ([[NaN,1,NaN],[1,0,1],[NaN,1,NaN]]);
+		expect(level.targetDistances).toMatchObject([[NaN,1,NaN],
+													 [1,  0,1],
+													 [NaN,1,NaN]]);
 	});
 
 	test('wraps around up', () => {
-		const level = new Level([[1,0,1],[0,0,0],[1,0,1]], 0);
+		const level = new Level(transpose([[1,0,1],
+										   [0,0,0],
+										   [1,0,1]]));
 		level.setTarget({x: 1, y: 0});
-		expect(level.targetDistances).toMatchObject ([[NaN,0,NaN],[2,1,2],[NaN,1,NaN]]);
+		expect(level.targetDistances).toMatchObject(transpose([[NaN,0,NaN],
+															   [2,  1,2],
+															   [NaN,1,NaN]]));
 	});
 
 	test('wraps around left', () => {
-		const level = new Level([[1,0,1],[0,0,0],[1,0,1]], 0);
+		const level = new Level(transpose([[1,0,1],
+										   [0,0,0],
+										   [1,0,1]]));
 		level.setTarget({x: 0, y: 1});
-		expect(level.targetDistances).toMatchObject ([[NaN,2,NaN],[0,1,1],[NaN,2,NaN]]);
+		expect(level.targetDistances).toMatchObject(transpose([[NaN,2,NaN],
+															   [0,  1,1],
+															   [NaN,2,NaN]]));
 	});
 
 	test('wraps around down', () => {
-		const level = new Level([[1,0,1],[0,0,0],[1,0,1]], 0);
+		const level = new Level(transpose([[1,0,1],
+										   [0,0,0],
+										   [1,0,1]]));
 		level.setTarget({x: 1, y: 2});
-		expect(level.targetDistances).toMatchObject ([[NaN,1,NaN],[2,1,2],[NaN,0,NaN]]);
+		expect(level.targetDistances).toMatchObject(transpose([[NaN,1,NaN],
+															   [2,  1,2],
+															   [NaN,0,NaN]]));
 	});
 
 	test('wraps around right', () => {
-		const level = new Level([[1,0,1],[0,0,0],[1,0,1]], 0);
+		const level = new Level(transpose([[1,0,1],
+										   [0,0,0],
+										   [1,0,1]]));
 		level.setTarget({x: 2, y: 1});
-		expect(level.targetDistances).toMatchObject ([[NaN,2,NaN],[1,1,0],[NaN,2,NaN]]);
+		expect(level.targetDistances).toMatchObject(transpose([[NaN,2,NaN],
+															   [1  ,1,0],
+															   [NaN,2,NaN]]));
 	});
 });
 
@@ -63,7 +99,7 @@ describe('placeRandomly', () => {
 		// workaround
 		const randomCoords = jest.fn();
 		randomCoords.mockImplementation( () => [DEFAULT_X, DEFAULT_Y] );
-		const level = new Level([[0,0,0],[0,0,0],[0,0,0]], 0, randomCoords);
+		const level = new Level([[0,0,0],[0,0,0],[0,0,0]], randomCoords);
 		const being = { x: null, y: null }
 
 
@@ -71,15 +107,15 @@ describe('placeRandomly', () => {
 		expect(randomCoords).toHaveBeenCalledTimes(1);
 		expect(being.x).toBe(DEFAULT_X);
 		expect(being.y).toBe(DEFAULT_Y);
-		expect(level.grid[DEFAULT_Y][DEFAULT_X]).toBe(being);
+		expect(level.grid[DEFAULT_X][DEFAULT_Y]).toBe(being);
 	});
 });
 
 describe('constructor', () => {
 	test('rejects irregular levels', () => {
 		const create = () => {
-			new Level([[0,0,0],[0,0],[0,0,0]], 0);
+			new Level([[0,0,0],[0,0],[0,0,0]]);
 		}
-		expect(create).toThrow("irregular level shape in line 1");
+		expect(create).toThrow("irregular level shape in column 1");
 	});
 });
