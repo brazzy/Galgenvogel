@@ -32,6 +32,7 @@ class Level {
 			if(wallGrid[x].length != this.height) throw "irregular level shape in column " + x;
 			this.grid.push([]);
 			for(var y=0; y<this.height; y++) {
+				if(![0, 1].includes(wallGrid[x][y])) throw `illegal value ${wallGrid[x][y]} at ${x},${y}`; 
 				this.grid[x].push(wallGrid[x][y]==1 ? WALL : EMPTY);
 			}
 		}

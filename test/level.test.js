@@ -118,4 +118,11 @@ describe('constructor', () => {
 		}
 		expect(create).toThrow("irregular level shape in column 1");
 	});
+
+	test('rejects unknown values', () => {
+		const create = () => {
+			new Level([[0,2,0],[0,0],[0,0,0]]);
+		}
+		expect(create).toThrow("illegal value 2 at 0,1");
+	});
 });
