@@ -63,10 +63,10 @@ class Galgenvogel {
 
 	finishLevel(won) {
 		if(won) {		
-			alert("you win!");
+			alert("You win! Let's make it more difficult.");
 			this.numMonsters++;
 		} else {
-			alert("you lose!");
+			alert("You lose! Let's start over.");
 			this.numMonsters = NUM_MONSTERS;
 			this.player.init();
 		}

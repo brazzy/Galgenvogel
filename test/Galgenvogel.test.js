@@ -276,7 +276,7 @@ describe('melee', () => {
 		gv.onKeyPress(Direction.Left);
 		expect(gv.player.health).toBe(HEALTH_START-1);
 		expect(gv.monsters.length).toBe(0);
-		expect(window.alert).toHaveBeenCalledWith("you win!");
+		expect(window.alert).toHaveBeenCalledWith("You win! Let's make it more difficult.");
 		expect(gv.init).toHaveBeenCalled();
 		expect(gv.player.init).not.toHaveBeenCalled();
 	});
@@ -297,7 +297,7 @@ describe('melee', () => {
 		expect(gv.monsters.length).toBe(numMonsters);
 		
 		gv.onKeyPress(Direction.Right);
-		expect(window.alert).toHaveBeenCalledWith("you win!");
+		expect(window.alert).toHaveBeenCalledWith("You win! Let's make it more difficult.");
 		expect(gv.monsters.length).toBe(numMonsters+1)
 	});
 
@@ -320,7 +320,7 @@ describe('melee', () => {
 		expect(gv.player.health).toBe(0);
 		expect(gv.monsters.length).toBe(1);
 		expect(gv.monsters[0].health).toBe(4);
-		expect(window.alert).toHaveBeenCalledWith("you lose!");
+		expect(window.alert).toHaveBeenCalledWith("You lose! Let's start over.");
 		expect(gv.init).toHaveBeenCalled();
 		expect(gv.player.init).toHaveBeenCalled();
 	});
@@ -375,7 +375,7 @@ describe('magic', () => {
 		expect(gv.player.health).toBe(HEALTH_START-1);
 		expect(gv.player.magic).toBe(0);
 		expect(gv.monsters.length).toBe(0);
-		expect(window.alert).toHaveBeenCalledWith("you win!");
+		expect(window.alert).toHaveBeenCalledWith("You win! Let's make it more difficult.");
 		expect(gv.init).toHaveBeenCalled();
 		expect(gv.player.init).not.toHaveBeenCalled();
 	});
