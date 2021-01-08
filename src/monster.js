@@ -1,14 +1,10 @@
 import { Color, Direction } from './engine-types.js';
+import { Being } from './being.js';
 
-class Monster {
+class Monster extends Being{
 	constructor(color, health, damage, perceptionRadius) {
-		this.spotTaken = true;
-		this.color = color;
-		this.health=health;
-		this.damage=damage;
+		super(color, health, damage);
 		this.perceptionRadius = perceptionRadius;
-		this.x = null;
-		this.y = null;
 	}
 	
 	move(level) {
@@ -16,7 +12,7 @@ class Monster {
 		if(distance <= this.perceptionRadius) {
 			const blocker = level.moveTowardsTarget(this)
 			if(blocker && blocker.isPlayer){
-				blocker.health -= this.damage;
+				this.attack(blocker);
 			}
 		}
 	}

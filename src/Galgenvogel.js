@@ -77,20 +77,23 @@ class Galgenvogel {
 	}
 
 	onKeyPress(direction) {
-		if(!this.player.move(this.level, direction)) {
-			return;
+		if(this.player.move(this.level, direction)) {
+			this.moveMonsters();
 		}
+	}
+	
+	moveMonsters() {
 		for(var i = this.monsters.length-1; i>=0; i--){
 			const monster = this.monsters[i];
-			if(monster.health > 0){
+			if(monster.isAlive()){
 				monster.move(this.level);
-				if(this.player.health <= 0) {
+				if(!this.player.isAlive()) {
 					this.finishLevel(false);
 				}
 			} else {
 				this.remove(monster);
 			}
-		}
+		}		
 	}
 
 	remove(monster) {
@@ -103,19 +106,8 @@ class Galgenvogel {
 	}
 
 	onDotClicked(x, y) {
-		if(this.player.magic > 0) {
-			const target = this.level.grid[x][y-HEIGHT_OFFSET];
-			if(target===this.player) {
-				this.level.remove(this.player);
-				this.level.placeRandomly(this.player);
-				this.player.magic--;
-			} else if (target.health){
-				target.health-=2;
-				this.player.magic--;
-				if(target.health <=0) {
-					this.remove(target);
-				}
-			}
+		if(this.player.cast(this.level, x, y)) {
+			this.moveMonsters();
 		}
 	}
 }

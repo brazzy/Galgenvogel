@@ -52,6 +52,10 @@ class Level {
 		this.grid[being.x][being.y] = EMPTY;
 	}
 	
+	get(x,y) {
+		return this.grid[x][y-HEIGHT_OFFSET];
+	}
+	
 	paint(game) {
 		for(var x=0; x<this.width; x++) {
 			for(var y=0; y<this.height; y++) {

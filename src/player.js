@@ -1,4 +1,5 @@
 import { Color, Direction } from './engine-types.js';
+import { Being } from './being.js';
 
 const HEAL_DELAY = 10;
 const HEALTH_START = 3;
@@ -7,15 +8,13 @@ const MAGIC_START = 1;
 const MAGIC_MAX = 2;
 
 
-class Player {
+class Player extends Being{
 	constructor(colorCycle){
+		super(Color.Green, HEALTH_START, 1);
 		this._colorCycle = colorCycle;
 		this._colorCount = colorCycle;
 		
 		this.isPlayer = true;
-		this.spotTaken = true;
-		this.x=null;
-		this.y=null;
 		this.init();
 	}
 
@@ -29,12 +28,30 @@ class Player {
 		}
 	}
 	
+	set color(c){}
+	
 	init() {
 		this.healCounter = HEAL_DELAY;
-		this.health=HEALTH_START;
-		this.maxHealth=HEALTH_MAX;
+		this.maxHealth = HEALTH_MAX;
 		this.magic = MAGIC_START;
-		this.maxMagic=MAGIC_MAX;
+		this.maxMagic = MAGIC_MAX;
+	}
+	
+	cast(level, x, y) {
+		if(this.magic > 0) {
+			const target = level.get(x, y);
+			if(target.isPlayer) {
+				level.remove(this);
+				level.placeRandomly(this);
+				this.magic--;
+				return true;
+			} else if (target.health){
+				target.hurt(2);
+				this.magic--;
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	move(level, direction) {
@@ -42,7 +59,7 @@ class Player {
 		var result;
 		if(blocker) {
 			if(blocker.health) {
-				blocker.health--;
+				this.attack(blocker);
 				result = true;
 			} else {
 				result = false;

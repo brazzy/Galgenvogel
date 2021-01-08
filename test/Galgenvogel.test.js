@@ -343,7 +343,7 @@ describe('magic', () => {
 		expect(gv.monsters[0].health).toBe(4);
 		
 		gv.onDotClicked(2, 1+HEIGHT_OFFSET);
-		expect(gv.player.health).toBe(HEALTH_START);
+		expect(gv.player.health).toBe(HEALTH_START-1);
 		expect(gv.monsters.length).toBe(1);
 		expect(gv.monsters[0].health).toBe(2);
 		expect(gv.player.magic).toBe(1);		
@@ -352,7 +352,7 @@ describe('magic', () => {
 		expect(gv.player.init).not.toHaveBeenCalled();			
 		
 		gv.onDotClicked(2, 1+HEIGHT_OFFSET);
-		expect(gv.player.health).toBe(HEALTH_START);
+		expect(gv.player.health).toBe(HEALTH_START-1);
 		expect(gv.player.magic).toBe(0);
 		expect(gv.monsters.length).toBe(0);
 		expect(window.alert).toHaveBeenCalledWith("you win!");
