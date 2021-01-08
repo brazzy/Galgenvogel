@@ -281,6 +281,26 @@ describe('melee', () => {
 		expect(gv.player.init).not.toHaveBeenCalled();
 	});
 
+	test('more monsters in next level', () => {
+		const numMonsters = 1;
+		const randomCoords = jest.fn();
+		randomCoords
+			.mockImplementationOnce( () => [1,1] )
+			.mockImplementationOnce( () => [2,1] )
+			.mockImplementationOnce( () => [1,1] )
+			.mockImplementationOnce( () => [2,1] )
+			.mockImplementationOnce( () => [0,1] );
+		const gv = new Galgenvogel(() => NO_WALLS, numMonsters, randomCoords);
+		gv.generateMonster = () => new Monster(Color.Orange, 1, 1, 10);
+
+		gv.init();
+		expect(gv.monsters.length).toBe(numMonsters);
+		
+		gv.onKeyPress(Direction.Right);
+		expect(window.alert).toHaveBeenCalledWith("you win!");
+		expect(gv.monsters.length).toBe(numMonsters+1)
+	});
+
 	test('get killed and lose', () => {
 		const randomCoords = jest.fn();
 		randomCoords

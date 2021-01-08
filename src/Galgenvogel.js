@@ -6,7 +6,7 @@ import { Color, Direction } from './engine-types.js';
 
 const FRAME_RATE = 5;
 
-const NUM_MONSTERS = 10;
+const NUM_MONSTERS = 4;
 
 // grid size of 24 is the engine default, we stick with it for now.
 // content is transposed to make it easier to edit visually.
@@ -64,8 +64,10 @@ class Galgenvogel {
 	finishLevel(won) {
 		if(won) {		
 			alert("you win!");
+			this.numMonsters++;
 		} else {
 			alert("you lose!");
+			this.numMonsters = NUM_MONSTERS;
 			this.player.init();
 		}
 		this.init();
