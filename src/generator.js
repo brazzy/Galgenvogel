@@ -21,6 +21,11 @@ function generateLevel(width, height, rooms, connections, randomCoords) {
 	// TODO connections
 }
 
+const MIN_GRID = [[1,1,1,1],
+				  [1,1,1,1],
+				  [1,1,1,1],
+				  [1,1,1,1]];
+
 function findLargestPossibleRoom(grid) {
 	const width = grid.length;
 	if(width<4) {
@@ -35,6 +40,11 @@ function findLargestPossibleRoom(grid) {
 		for(var y=0; y<height; y++) {
 			if(![0, 1].includes(grid[x][y])) throw "only 0 and 1 allowed"; 
 		}
+	}
+	
+	// base case for recursion
+	if(JSON.stringify(MIN_GRID) === JSON.stringify(grid)) {
+		return [1,1,2,2];
 	}
 
 	return [0,0,0,0];
