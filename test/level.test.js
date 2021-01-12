@@ -29,6 +29,21 @@ describe('transpose', () => {
 									  [0,0,1],
 									  [1,0,0]]);
 	});
+	test('rectangular', () => {
+		const result = transpose([[1,0,1],
+								  [0,1,0]]);
+		expect(result).toMatchObject([[1,0],
+									  [0,1],
+									  [1,0]]);
+	});
+	test('size 1', () => {
+		const result = transpose([[1]]);
+		expect(result).toMatchObject([[1]]);
+	});
+	test('size 0', () => {
+		const result = transpose([]);
+		expect(result).toMatchObject([]);
+	});
 });
 
 describe('pathfinding algorithm', () => {

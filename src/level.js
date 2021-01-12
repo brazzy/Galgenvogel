@@ -13,7 +13,14 @@ const EMPTY = {
 	spotTaken: false,
 }
 
-function transpose(level) { // for transposing the hardcoded level
+/**
+ * For transposing hardcoded levels so they look natural,
+ * and test inputs to test more cases.
+ */
+function transpose(level) { 
+	if(level.length == 0) {
+		return [];
+	}
 	return level[0].map((x,i) => level.map(x => x[i]));
 }
 
