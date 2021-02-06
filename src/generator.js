@@ -1,3 +1,6 @@
+// NOTE: This is incomplete and unneccessarily complicated, will abandon this and try
+// the approach described here: https://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/
+
 
 function generateLevel(width, height, rooms, connections, randomCoords) {
 	const result = [];
@@ -43,8 +46,12 @@ function findLargestPossibleRoom(grid) {
 	}
 	
 	// base case for recursion
-	if(JSON.stringify(MIN_GRID) === JSON.stringify(grid)) {
-		return [1,1,2,2];
+	if (width==4 && height==4) {
+		if(grid.findIndex(row => row.includes(0)) != -1){
+			return [0,0,0,0];// oh, problem! This lacks information because a single candidate square could be part of a room!		
+		} else {
+			return [1,1,2,2];
+		}	
 	}
 
 	return [0,0,0,0];

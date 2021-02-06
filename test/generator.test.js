@@ -2,6 +2,9 @@ import { jest } from '@jest/globals';
 import { generateLevel, findLargestPossibleRoom } from '../src/generator.js';
 import { transpose } from '../src/level.js';
 
+// NOTE: This is incomplete and unneccessarily complicated, will abandon this and try
+// the approach described here: https://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/
+
 describe('findLargestPossibleRoom', () => {
 
 	const paramsIllegalContent = [
@@ -86,7 +89,6 @@ describe('findLargestPossibleRoom', () => {
 	test.each(paramsLevelTooSmall)(
 		"grid %o is too small",
 		(grid) => {
-			debugger;
 			expect(() => findLargestPossibleRoom(transpose(grid)))
 			.toThrow("grid is smaller than 4x4");			
 			expect(() => findLargestPossibleRoom(grid))
@@ -235,7 +237,8 @@ describe('findLargestPossibleRoom', () => {
 
 	test.each(paramsValidResult)(
 		"%s",
-		(description, grid, expectedResult) => {			
+		(description, grid, expectedResult) => {
+			debugger;			
 			expect(findLargestPossibleRoom(grid)).toMatchObject(expectedResult);
 		}
 	);
