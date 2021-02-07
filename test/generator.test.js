@@ -1,255 +1,112 @@
 import { jest } from '@jest/globals';
-import { generateLevel, findLargestPossibleRoom } from '../src/generator.js';
+import { Room } from '../src/generator.js';
 import { transpose } from '../src/level.js';
 
-// NOTE: This is incomplete and unneccessarily complicated, will abandon this and try
-// the approach described here: https://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/
 
-describe('findLargestPossibleRoom', () => {
+const EMPTY_LEVEL = [
+[1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1],
+];
 
-	const paramsIllegalContent = [
-		[2, 		[[1,1,1,1],
-					 [1,1,1,1],
-					 [1,2,1,1],
-					 [1,1,1,1]]],
-		[-1, 		[[1,1,1,1],
-					 [1,1,1,1],
-					 [1,1,1,1],
-					 [1,1,-1,1]]],
-		[0.1, 		[[1,1,1,1],
-					 [1,1,1,1],
-					 [0.1,1,1,1],
-					 [1,1,1,1]]],
-		[null,		[[1,1,1,1],
-					 [1,1,1,1],
-					 [1,1,1,1],
-					 [null,1,1,1]]],
-		[undefined, [[1,1,1,1],
-					 [1,1,1,1],
-					 [1,undefined,1,1],
-					 [1,1,1,1]]],
-		[NaN, 		[[1,1,1,1],
-					 [1,1,1,1],
-					 [1,1,NaN,1],
-					 [1,1,1,1]]],
+const ONE_ROOM = transpose([
+[1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,0,0,1,1,1],
+[1,1,1,1,1,0,0,1,1,1],
+[1,1,1,1,1,0,0,1,1,1],
+[1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1],
+[1,1,1,1,1,1,1,1,1,1],
+]);
+
+describe('Room', () => {
+
+	const paramsToString = [
+		[new Room(0,0,1,1), "(0,0 1x1)"],
+		[new Room(7,10,5,2), "(7,10 5x2)"],
 	];
 
-	test.each(paramsIllegalContent)(
-		"grid character %s in grid is illegal",
-		(wrongContent, grid) => {
-			expect(() => findLargestPossibleRoom(grid))
-			.toThrow("only 0 and 1 allowed");		
-			expect(() => findLargestPossibleRoom(transpose(grid)))
-			.toThrow("only 0 and 1 allowed");			
+	test.each(paramsToString)(
+		"rooms %o is described as %s",
+		(room, expected) => {
+			expect(room.toString()).toBe(expected);
 		}
 	);
 
-	test('shape wrong', () => {
-		expect(() => findLargestPossibleRoom([[1,1,1,1,1],
-											  [1,1,1,1],
-											  [1,1,1,1],
-											  [1,1,1,1]]))
-		.toThrow("irregular grid");
-		expect(() => findLargestPossibleRoom([[1,1,1,1],
-											  [1,1,1,1],
-											  [1,1,1,1,1],
-											  [1,1,1,1]]))
-		.toThrow("irregular grid");
-	});
+	const paramsFitsInto = [
+		[new Room(0,0,1,1), true, EMPTY_LEVEL],
+		[new Room(9,9,1,1), true, EMPTY_LEVEL],
+		[new Room(0,9,1,1), true, EMPTY_LEVEL],
+		[new Room(9,0,1,1), true, EMPTY_LEVEL],
+		[new Room(0,0,10,10), true, EMPTY_LEVEL],
+		[new Room(4,4,5,5), true, EMPTY_LEVEL],
+		[new Room(0,0,11,11), false, EMPTY_LEVEL],
+		[new Room(-1,0,1,1), false, EMPTY_LEVEL],
+		[new Room(0,-1,1,1), false, EMPTY_LEVEL],
+		[new Room(9,9,2,1), false, EMPTY_LEVEL],
+		[new Room(9,9,1,2), false, EMPTY_LEVEL],
 
-	const paramsLevelTooSmall = [
-		[[]],
-		[[[1]]],
-		[[[0,0],[0,0]]],
-		[[[1,1],[1,1]]],
-		[[[0,1],[1,0]]],
-		[[[1,1],[0,0]]],
-		[[[1,1,1],[1,1,1]]],
-		[[[1,1],[1,1],[1,1]]],
+		[new Room(0,0,1,1), true, ONE_ROOM],
+		[new Room(0,0,10,10), false, ONE_ROOM],
+		[new Room(0,4,10,1), false, ONE_ROOM],
+		
+		[new Room(3,1,2,2), true, ONE_ROOM],
+		[new Room(3,1,3,3), false, ONE_ROOM],
+		[new Room(3,1,2,3), true, ONE_ROOM],
+		[new Room(3,1,3,2), true, ONE_ROOM],
 
-		[[[1,1,1],
-		  [1,1,1],
-		  [1,1,0]]],
-		
-		[[[1,1,1],
-		  [1,1,1],
-		  [1,1,1]]],
-		
-		[[[1,1,1],
-		  [1,1,1],
-		  [1,1,1],
-		  [1,1,1]]],
-		
-		[[[1,1,0],
-		  [1,1,1],
-		  [1,1,1],
-		  [1,1,1]]],
+		[new Room(7,1,2,2), true, ONE_ROOM],
+		[new Room(6,1,3,3), false, ONE_ROOM],
+		[new Room(6,1,3,2), true, ONE_ROOM],
+		[new Room(7,1,2,3), true, ONE_ROOM],
+
+        [new Room(0,0,6,4), false, ONE_ROOM],
+        [new Room(3,5,3,3), false, ONE_ROOM],
 	];
 
-	test.each(paramsLevelTooSmall)(
-		"grid %o is too small",
-		(grid) => {
-			expect(() => findLargestPossibleRoom(transpose(grid)))
-			.toThrow("grid is smaller than 4x4");			
-			expect(() => findLargestPossibleRoom(grid))
-			.toThrow("grid is smaller than 4x4");
-		}
-	);
-	
-	const paramsValidResult = [
-		[ 
-			'4x4 success 2x2',
-			[[1,1,1,1],
-			 [1,1,1,1],
-			 [1,1,1,1],
-			 [1,1,1,1]],
-			[1,1,2,2]
-		],[
-			'4x4 taken',
-			[[1,1,1,1],
-			 [1,0,1,1],
-			 [1,1,1,1],
-			 [1,1,1,1]],
-			[0,0,0,0]
-		],[ 
-			'4x4 blocked 0,0',
-			[[0,1,1,1],
-			 [1,1,1,1],
-			 [1,1,1,1],
-			 [1,1,1,1]],
-			[0,0,0,0]
-		],[
-			'4x4 blocked 1,0',
-			[[1,0,1,1],
-			 [1,1,1,1],
-			 [1,1,1,1],
-			 [1,1,1,1]],
-			[0,0,0,0]
-		],[
-			'4x4 blocked 2,0',
-			[[1,1,0,1],
-			 [1,1,1,1],
-			 [1,1,1,1],
-			 [1,1,1,1]],
-			[0,0,0,0]
-		],[
-			'5x5 success 3x3',
-			[[1,1,1,1,1],
-			 [1,1,1,1,1],
-			 [1,1,1,1,1],
-			 [1,1,1,1,1],
-			 [1,1,1,1,1]],
-			[1,1,3,3]
-		],[
-			'5x5 blocked 1,1',
-			[[1,1,1,1,1],
-			 [1,0,1,1,1],
-			 [1,1,1,1,1],
-			 [1,1,1,1,1],
-			 [1,1,1,1,1]],
-			[0,0,0,0]
-		],[
-			'5x5 blocked 2,1',
-			[[1,1,1,1,1],
-			 [1,1,0,1,1],
-			 [1,1,1,1,1],
-			 [1,1,1,1,1],
-			 [1,1,1,1,1]],
-			[0,0,0,0]
-		],[
-			'5x5 success 2x3',
-			[[1,1,1,0,0],
-			 [1,1,1,1,1],
-			 [1,1,1,1,1],
-			 [1,1,1,1,1],
-			 [1,1,1,1,1]],
-			[2,1,2,3]
-		],[
-			'5x5 success 3x2',
-			[[1,1,1,1,1],
-			 [1,1,1,1,1],
-			 [1,1,1,1,0],
-			 [1,1,1,1,1],
-			 [1,1,1,1,1]],
-			[1,1,3,2]
-		],[
-			'7x7 success 4x2',
-			[[1,1,1,1,1,1,1],
-			 [1,0,0,1,1,1,1],
-			 [1,0,0,1,1,1,1],
-			 [1,1,1,1,1,1,1],
-			 [1,1,1,1,1,1,1],
-			 [1,1,1,1,1,1,1],
-			 [1,1,1,1,0,1,1]],
-			[1,4,4,2]
-		],[
-			'7x7 failure',
-			[[1,1,1,0,1,1,1],
-			 [1,0,0,1,1,1,1],
-			 [1,0,1,1,1,1,1],
-			 [1,1,1,1,1,1,1],
-			 [1,1,1,1,0,1,1],
-			 [1,1,1,1,1,1,1],
-			 [1,1,1,0,1,1,1]],
-			[0,0,0,0]
-		],[
-			'7x4 failure',
-			[[1,1,1,1,1,1,1],
-			 [1,1,1,1,0,1,1],
-			 [1,0,1,1,1,1,1],
-			 [1,1,1,1,1,1,1]],
-			[0,0,0,0]
-		],[
-			'7x4 success 2x2',
-			[[1,1,1,1,0,1,1],
-			 [1,1,1,1,1,1,1],
-			 [1,1,1,1,1,1,1],
-			 [1,1,1,1,1,1,1]],
-			[1,1,2,2]
-		],[
-			'7x10 success 2x5',
-			[[1,1,1,1,1,1,1],
-			 [1,1,1,1,1,1,1],
-			 [1,1,1,1,1,0,1],
-			 [1,1,1,1,1,1,1],
-			 [1,1,1,1,1,1,1],
-			 [1,0,0,0,0,0,1],
-			 [1,1,1,1,1,1,1],
-			 [1,1,1,1,1,1,1],
-			 [1,1,1,1,1,1,1],
-			 [1,1,1,1,1,1,1]],
-			[7,1,2,5]
-		],[
-			'7x10 success 3x3',
-			[[1,1,1,1,1,1,1],
-			 [1,1,1,1,1,1,1],
-			 [1,1,1,1,1,0,1],
-			 [1,1,1,1,1,1,1],
-			 [1,1,1,1,1,1,1],
-			 [1,0,0,0,0,0,1],
-			 [1,1,1,1,1,1,1],
-			 [1,1,1,1,1,1,1],
-			 [1,1,1,1,1,1,1],
-			 [1,1,1,1,1,1,0]],
-			[1,1,3,3]
-		]
-	]
-
-	test.each(paramsValidResult)(
-		"%s",
-		(description, grid, expectedResult) => {
-			debugger;			
-			expect(findLargestPossibleRoom(grid)).toMatchObject(expectedResult);
+	test.each(paramsFitsInto)(
+		"room %s fits: %s",
+		(room, expected, grid) => {
+			expect(room.fitsInto(grid)).toBe(expected);
 		}
 	);
 
-	test.each(paramsValidResult)(
-		"transposed %s",
-		(description, grid, expectedResult) => {
-			var x,y,width,height;
-			[x,y,width,height] = expectedResult;
-			expect(findLargestPossibleRoom(grid)).toMatchObject([y,x,height,width]);
+	const paramsFitsWithMargin = [
+		[new Room(0,0,1,1), false, EMPTY_LEVEL],
+		[new Room(9,9,1,1), false, EMPTY_LEVEL],
+		[new Room(0,9,1,1), false, EMPTY_LEVEL],
+		[new Room(9,0,1,1), false, EMPTY_LEVEL],
+		[new Room(1,1,1,1), true, EMPTY_LEVEL],
+		[new Room(8,1,1,1), true, EMPTY_LEVEL],
+		[new Room(1,8,1,1), true, EMPTY_LEVEL],
+		[new Room(8,8,1,1), true, EMPTY_LEVEL],
+		[new Room(1,1,8,8), true, EMPTY_LEVEL],
+
+		[new Room(1,1,3,8), true, ONE_ROOM],
+		[new Room(1,1,8,1), true, ONE_ROOM],
+		[new Room(1,7,8,2), true, ONE_ROOM],
+		[new Room(8,1,1,8), true, ONE_ROOM],
+
+		[new Room(1,1,4,2), false, ONE_ROOM],
+		[new Room(4,6,1,1), false, ONE_ROOM],
+		[new Room(7,6,1,1), false, ONE_ROOM],
+		[new Room(7,2,1,1), false, ONE_ROOM],
+    ];
+
+	test.each(paramsFitsWithMargin)(
+		"room %s fits with margin: %s",
+		(room, expected, grid) => {
+			expect(room.fitsWithMargin(grid)).toBe(expected);
 		}
 	);
-
 });
