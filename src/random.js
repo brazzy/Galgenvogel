@@ -1,6 +1,5 @@
 /**
- * Returns array of random coordinates within a grid of the given width and height. Usage:
- * [x, y] = randomCoords(width, height);
+ * Returns a random integer between 0 (inclusive) and maxExclusive.
  */
 function randomInt(maxExclusive) {
 	return Math.floor(Math.random()*maxExclusive);
