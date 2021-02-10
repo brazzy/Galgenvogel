@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { Room } from '../src/generator.js';
+import { Room, generateRoom, generateLevel } from '../src/generator.js';
 import { transpose } from '../src/level.js';
 
 
@@ -59,7 +59,7 @@ describe('Room', () => {
 		[new Room(0,0,1,1), true, ONE_ROOM],
 		[new Room(0,0,10,10), false, ONE_ROOM],
 		[new Room(0,4,10,1), false, ONE_ROOM],
-		
+
 		[new Room(3,1,2,2), true, ONE_ROOM],
 		[new Room(3,1,3,3), false, ONE_ROOM],
 		[new Room(3,1,2,3), true, ONE_ROOM],
@@ -109,4 +109,66 @@ describe('Room', () => {
 			expect(room.fitsWithMargin(grid)).toBe(expected);
 		}
 	);
+
+	test('writeToLevel', () => {
+		const room = new Room(2,1,2,3);
+        const level = transpose(EMPTY_LEVEL);
+        room.writeToLevel(level);
+		expect(level).toMatchObject(transpose(
+		                            [[1,1,1,1,1,1,1,1,1,1],
+                                     [1,1,0,0,1,1,1,1,1,1],
+                                     [1,1,0,0,1,1,1,1,1,1],
+                                     [1,1,0,0,1,1,1,1,1,1],
+                                     [1,1,1,1,1,1,1,1,1,1],
+                                     [1,1,1,1,1,1,1,1,1,1],
+                                     [1,1,1,1,1,1,1,1,1,1],
+                                     [1,1,1,1,1,1,1,1,1,1],
+                                     [1,1,1,1,1,1,1,1,1,1],
+                                     [1,1,1,1,1,1,1,1,1,1],
+                                     ]));
+	});
+
+	test('generateRoom', () => {
+        const randomInt = jest.fn();
+        randomInt
+            .mockReturnValueOnce( 3 )
+            .mockReturnValueOnce( 1 )
+            .mockReturnValueOnce( 2 )
+            .mockReturnValueOnce( 0 );
+
+        expect(generateRoom(10, 10, randomInt).toString()).toBe('(3,1 4x2)');
+	})
+
+	test('generateLevel', () => {
+        const randomInt = jest.fn();
+        randomInt
+            .mockReturnValueOnce( 3 )
+            .mockReturnValueOnce( 1 )
+            .mockReturnValueOnce( 2 )
+            .mockReturnValueOnce( 0 )
+
+            .mockReturnValueOnce( 1 )
+            .mockReturnValueOnce( 2 )
+            .mockReturnValueOnce( 4 )
+            .mockReturnValueOnce( 1 )
+
+            .mockReturnValueOnce( 6 )
+            .mockReturnValueOnce( 4 )
+            .mockReturnValueOnce( 0 )
+            .mockReturnValueOnce( 2 )
+            ;
+        const level = generateLevel(10, 9, 3, randomInt);
+
+		expect(level).toMatchObject(transpose(
+		                            [[1,1,1,1,1,1,1,1,1,1],
+                                     [1,1,1,0,0,0,0,1,1,1],
+                                     [1,1,1,0,0,0,0,1,1,1],
+                                     [1,1,1,1,1,1,1,1,1,1],
+                                     [1,1,1,1,1,1,0,0,1,1],
+                                     [1,1,1,1,1,1,0,0,1,1],
+                                     [1,1,1,1,1,1,0,0,1,1],
+                                     [1,1,1,1,1,1,0,0,1,1],
+                                     [1,1,1,1,1,1,1,1,1,1],
+                                     ]));
+	})
 });

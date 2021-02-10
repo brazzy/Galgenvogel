@@ -3,10 +3,10 @@
 
 class Room {
 	constructor(x, y, width, height){
-		this.height = height;
-		this.width = width;
-		this.x = x;
-		this.y = y;
+        this.height = height;
+        this.width = width;
+        this.x = x;
+        this.y = y;
 	}
 
 	fitsInto(level) {
@@ -25,14 +25,21 @@ class Room {
 				}
 			}
 		}
-		
+
 		return true;
 	}
 
 	fitsWithMargin(level) {
-    	debugger;
 	    const withMargin = new Room(this.x-1, this.y-1, this.width+2, this.height+2);
 	    return withMargin.fitsInto(level);
+	}
+
+	writeToLevel(level) {
+		for(var x=this.x; x<this.x+this.width; x++) {
+			for(var y=this.y; y<this.y+this.height; y++) {
+			    level[x][y] = 0;
+			}
+		}
 	}
 
 	toString() {
@@ -40,9 +47,25 @@ class Room {
 	}
 }
 
-//function generateLevel(width, height, roomAttempts, randomCoords) {
-//}
+function generateRoom(levelWidth, levelHeight, randomInt) {
+    return new Room(randomInt(levelWidth), randomInt(levelHeight), randomInt(5)+2, randomInt(5)+2);
+}
 
+function generateLevel(width, height, roomAttempts, randomInt) {
+    const result = [];
+    for(var x=0; x<width; x++) {
+        result.push([]);
+        for(var y=0; y<height; y++) {
+            result[x].push(1);
+        }
+    }
+    for(var i=0; i<roomAttempts; i++) {
+        const room = generateRoom(width, height, randomInt);
+        if(room.fitsWithMargin(result)) {
+            room.writeToLevel(result);
+        }
+    }
+    return result;
+}
 
-
-export {Room}
+export { Room, generateLevel, generateRoom }
