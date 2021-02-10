@@ -40,7 +40,7 @@ describe('movement', () => {
 	
 	test('basic', () => {
 		const randomCoords = jest.fn();
-		randomCoords.mockImplementation( () => [1,1] );
+		randomCoords.mockReturnValue( [1,1] );
 		const gv = new Galgenvogel(() => NO_WALLS, 0, randomCoords);
 
 		gv.init();
@@ -66,7 +66,7 @@ describe('movement', () => {
 
 	test('walls', () => {
 		const randomCoords = jest.fn();
-		randomCoords.mockImplementation( () => [1,1] );
+		randomCoords.mockReturnValue( [1,1] );
 		const gv = new Galgenvogel(() => [[1,1,1], [1,0,1], [1,1,1]], 0, randomCoords);
 
 		gv.init();
@@ -92,7 +92,7 @@ describe('movement', () => {
 
 	test('wraparound', () => {
 		const randomCoords = jest.fn();
-		randomCoords.mockImplementation( () => [0,0] );
+		randomCoords.mockReturnValue( [0,0] );
 		const gv = new Galgenvogel(() => NO_WALLS, 0, randomCoords);
 
 		gv.init();
@@ -118,7 +118,7 @@ describe('movement', () => {
 
 	test('wraparound blocked by walls up and left', () => {
 		const randomCoords = jest.fn();
-		randomCoords.mockImplementation( () => [0,0] );
+		randomCoords.mockReturnValue( [0,0] );
 		const gv = new Galgenvogel(() => [[0,0,1], [0,0,0], [1,0,0]], 0, randomCoords);
 
 		gv.init();
@@ -136,7 +136,7 @@ describe('movement', () => {
 
 	test('wraparound blocked by walls down and right', () => {
 		const randomCoords = jest.fn();
-		randomCoords.mockImplementation( () => [2,2] );
+		randomCoords.mockReturnValue( [2,2] );
 		const gv = new Galgenvogel(() => [[0,0,1], [0,0,0], [1,0,0]], 0, randomCoords);
 
 		gv.init();
@@ -155,8 +155,8 @@ describe('movement', () => {
 	test('monster follows with limited perception range', () => {
 		const randomCoords = jest.fn();
 		randomCoords
-			.mockImplementationOnce( () => [0,0] )
-			.mockImplementationOnce( () => [2,2] );
+			 .mockReturnValueOnce( [0,0] )
+			 .mockReturnValueOnce( [2,2] );
 		const gv = new Galgenvogel(() => [[0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0]], 1, randomCoords);
 		gv.generateMonster = () => new Monster(Color.Orange, 1, 1, 2);
 
@@ -226,8 +226,8 @@ describe('melee', () => {
 	test('exchange blows', () => {
 		const randomCoords = jest.fn();
 		randomCoords
-			.mockImplementationOnce( () => [1,1] )
-			.mockImplementationOnce( () => [2,1] );
+			 .mockReturnValueOnce( [1,1] )
+			 .mockReturnValueOnce( [2,1] );
 		const gv = new Galgenvogel(() => NO_WALLS, 1, randomCoords);
 		gv.generateMonster = () => new Monster(Color.Orange, 2, 1, 10);
 
@@ -252,9 +252,9 @@ describe('melee', () => {
 	test('kill monsters and win', () => {
 		const randomCoords = jest.fn();
 		randomCoords
-			.mockImplementationOnce( () => [1,1] )
-			.mockImplementationOnce( () => [0,1] )
-			.mockImplementationOnce( () => [2,1] );
+			 .mockReturnValueOnce( [1,1] )
+			 .mockReturnValueOnce( [0,1] )
+			 .mockReturnValueOnce( [2,1] );
 		const gv = new Galgenvogel(() => NO_WALLS, 2, randomCoords);
 		gv.generateMonster = () => new Monster(Color.Orange, 1, 1, 10);
 
@@ -285,11 +285,11 @@ describe('melee', () => {
 		const numMonsters = 1;
 		const randomCoords = jest.fn();
 		randomCoords
-			.mockImplementationOnce( () => [1,1] )
-			.mockImplementationOnce( () => [2,1] )
-			.mockImplementationOnce( () => [1,1] )
-			.mockImplementationOnce( () => [2,1] )
-			.mockImplementationOnce( () => [0,1] );
+			 .mockReturnValueOnce( [1,1] )
+			 .mockReturnValueOnce( [2,1] )
+			 .mockReturnValueOnce( [1,1] )
+			 .mockReturnValueOnce( [2,1] )
+			 .mockReturnValueOnce( [0,1] );
 		const gv = new Galgenvogel(() => NO_WALLS, numMonsters, randomCoords);
 		gv.generateMonster = () => new Monster(Color.Orange, 1, 1, 10);
 
@@ -304,8 +304,8 @@ describe('melee', () => {
 	test('get killed and lose', () => {
 		const randomCoords = jest.fn();
 		randomCoords
-			.mockImplementationOnce( () => [1,1] )
-			.mockImplementationOnce( () => [2,1] );
+			 .mockReturnValueOnce( [1,1] )
+			 .mockReturnValueOnce( [2,1] );
 		const gv = new Galgenvogel(() => NO_WALLS, 1, randomCoords);
 		gv.generateMonster = () => new Monster(Color.Orange, 5, 3, 10);
 
@@ -330,7 +330,7 @@ describe('magic', () => {
 	test('does not work on walls', () => {
 		const randomCoords = jest.fn();
 		randomCoords
-			.mockImplementationOnce( () => [0,0] );
+			 .mockReturnValueOnce( [0,0] );
 		const gv = new Galgenvogel(() => [[0,0],[0,1]], 0, randomCoords);
 
 		gv.init();
@@ -348,8 +348,8 @@ describe('magic', () => {
 	test('kill monster with magic and win', () => {
 		const randomCoords = jest.fn();
 		randomCoords
-			.mockImplementationOnce( () => [1,1] )
-			.mockImplementationOnce( () => [2,1] );
+			 .mockReturnValueOnce( [1,1] )
+			 .mockReturnValueOnce( [2,1] );
 		const gv = new Galgenvogel(() => NO_WALLS, 1, randomCoords);
 		gv.generateMonster = () => new Monster(Color.Orange, 4, 1, 10);
 
@@ -383,8 +383,8 @@ describe('magic', () => {
 	test('teleport', () => {
 		const randomCoords = jest.fn();
 		randomCoords
-			.mockImplementationOnce( () => [1,1] )
-			.mockImplementationOnce( () => [2,1] );
+			 .mockReturnValueOnce( [1,1] )
+			 .mockReturnValueOnce( [2,1] );
 		const gv = new Galgenvogel(() => NO_WALLS, 0, randomCoords);
 
 		gv.init();
@@ -401,9 +401,9 @@ describe('magic', () => {
 	test('magic is limited', () => {
 		const randomCoords = jest.fn();
 		randomCoords
-			.mockImplementationOnce( () => [1,1] )
-			.mockImplementationOnce( () => [2,1] )
-			.mockImplementationOnce( () => [2,2] );
+			 .mockReturnValueOnce( [1,1] )
+			 .mockReturnValueOnce( [2,1] )
+			 .mockReturnValueOnce( [2,2] );
 		const gv = new Galgenvogel(() => NO_WALLS, 1, randomCoords);
 		gv.generateMonster = () => new Monster(Color.Orange, 1, 1, 10);
 
