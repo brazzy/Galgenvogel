@@ -86,7 +86,7 @@ class Level {
 			const [x,y] = toProcess.pop();
 			const currentDistance = result[x][y];
 			for(const direction of [Direction.Up, Direction.Down, Direction.Right, Direction.Left]) {
-				const [nextX, nextY] = this.step(x, y, direction);
+				const [nextX, nextY] = step(x, y, this.width, this.height, direction);
 				if(result[nextX][nextY] > currentDistance+1) {
 					result[nextX][nextY] = currentDistance+1;
 					toProcess.push([nextX, nextY]);					
@@ -96,27 +96,11 @@ class Level {
 		this.targetDistances = result;
 	}
 	
-	step(x, y, direction) {
-		if (direction == Direction.Up) {
-			y = normalize(y-1, this.height);
-		}
-		if (direction == Direction.Down) {
-			y = normalize(y+1, this.height);
-		}
-		if (direction == Direction.Left) {
-			x = normalize(x-1, this.width);
-		}
-		if (direction == Direction.Right) {
-			x = normalize(x+1, this.width);
-		}
-		return [x, y];
-	}
-		
 	/**
 	 * Returns null if move was successful, blocking entity otherwise
 	 */
 	move(being, direction) {
-		const [x, y] = this.step(being.x, being.y, direction);
+		const [x, y] = step(being.x, being.y, this.width, this.height, direction);
 		if(this.grid[x][y].spotTaken) {
 			return this.grid[x][y];
 		} else {
@@ -138,7 +122,7 @@ class Level {
 	moveTowardsTarget(being) {
 		const currentDistance = this.targetDistances[being.x][being.y];
 		for(const direction of [Direction.Up, Direction.Down, Direction.Right, Direction.Left]) {
-			const [nextX, nextY] = this.step(being.x, being.y, direction);
+			const [nextX, nextY] = step(being.x, being.y, this.width, this.height, direction);
 			if(this.targetDistances[nextX][nextY] < currentDistance) {
 				return this.move(being, direction);
 			}
@@ -146,6 +130,22 @@ class Level {
 	}
 }
 
+function step(x, y, width, height, direction) {
+	if (direction == Direction.Up) {
+		y = normalize(y-1, height);
+	}
+	if (direction == Direction.Down) {
+		y = normalize(y+1, height);
+	}
+	if (direction == Direction.Left) {
+		x = normalize(x-1, width);
+	}
+	if (direction == Direction.Right) {
+		x = normalize(x+1, width);
+	}
+	return [x, y];
+}
+		
 
 function normalize(value, max) {
 	if(value > (max-1)) return value - max;
@@ -153,4 +153,4 @@ function normalize(value, max) {
 	return value;
 }
 
-export {Level, HEIGHT_OFFSET, transpose}
+export {Level, HEIGHT_OFFSET, transpose, step}
