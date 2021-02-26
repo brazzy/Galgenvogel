@@ -1,6 +1,9 @@
 // Random level generator based on the approach described here: 
 // https://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/
 
+import { step } from './level.js';
+import { Direction } from './engine-types.js';
+
 class Room {
 	constructor(x, y, width, height){
         this.height = height;
@@ -68,4 +71,73 @@ function generateLevel(width, height, roomAttempts, randomInt) {
     return result;
 }
 
-export { Room, generateLevel, generateRoom }
+function validateCorridorStart(level, x, y) {
+	const room = new Room(x,y,1,1);
+	return room.fitsWithMargin(level);
+}
+
+function blockedMove(level, x, y, ...directions) {
+	const width = level.length;
+	const height = level[0].length;
+	const [newX, newY] = step(x,y,width,height, ...directions);
+	return level[newX][newY] === 0;
+}
+
+function blockedDirection(level, x, y, direction) {
+	const width = level.length;
+	const height = level[0].length;
+    if (direction == Direction.Up) {
+        return blockedMove(level, x, y, Direction.Up)
+            || blockedMove(level, x, y, Direction.Up, Direction.Left)
+            || blockedMove(level, x, y, Direction.Up, Direction.Right)
+    } else if (direction == Direction.Down) {
+        return blockedMove(level, x, y, Direction.Down)
+            || blockedMove(level, x, y, Direction.Down, Direction.Left)
+            || blockedMove(level, x, y, Direction.Down, Direction.Right)
+    } else if (direction == Direction.Left) {
+        return blockedMove(level, x, y, Direction.Left)
+            || blockedMove(level, x, y, Direction.Left, Direction.Up)
+            || blockedMove(level, x, y, Direction.Left, Direction.Down)
+    } else if (direction == Direction.Right) {
+        return blockedMove(level, x, y, Direction.Right)
+            || blockedMove(level, x, y, Direction.Right, Direction.Up)
+            || blockedMove(level, x, y, Direction.Right, Direction.Down)
+    } else {
+        throw new Error("Unknown direction: " + direction);
+    }
+}
+
+function validCorridorDirection(level, x, y, direction) {
+	const width = level.length;
+	const height = level[0].length;
+	if((x==0 || x==width-1) && (direction==Direction.Up || direction==Direction.Down)){
+		return false;
+	}
+	if((y==0 || y==height-1) && (direction==Direction.Left || direction==Direction.Right)){
+		return false;
+	}
+	if(blockedDirection(level, x, y, direction)) {
+	    return false;
+	}
+	var [newX, newY] = step(x,y,width,height,direction);
+	if(newX==0 || newX==width-1 || newY==0 || newY==height-1) {
+	    if(blockedDirection(level, newX, newY, direction)) {
+	        return false;
+	    } else {
+        	[newX, newY] = step(newX,newY,width,height,direction);
+        	return !blockedDirection(level, newX, newY, direction);
+	    }
+	} else {
+    	return !blockedDirection(level, newX, newY, direction);
+	}
+}
+
+function validCorridorDirections(level, x, y) {
+	const width = level.length;
+	const height = level[0].length;
+    return [Direction.Up, Direction.Right, Direction.Down, Direction.Left]
+        .filter(dir => validCorridorDirection(level, x, y, dir))
+        .map(dir => step(x,y,width,height,dir));
+}
+
+export { Room, generateLevel, generateRoom, validateCorridorStart, validCorridorDirection, validCorridorDirections, blockedDirection, blockedMove }

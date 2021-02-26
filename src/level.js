@@ -130,19 +130,20 @@ class Level {
 	}
 }
 
-function step(x, y, width, height, direction) {
-	if (direction == Direction.Up) {
-		y = normalize(y-1, height);
-	}
-	if (direction == Direction.Down) {
-		y = normalize(y+1, height);
-	}
-	if (direction == Direction.Left) {
-		x = normalize(x-1, width);
-	}
-	if (direction == Direction.Right) {
-		x = normalize(x+1, width);
-	}
+function step(x, y, width, height, ...directions) {
+    for(const direction of directions) {
+        if (direction == Direction.Up) {
+            y = normalize(y-1, height);
+        } else if (direction == Direction.Down) {
+            y = normalize(y+1, height);
+        } else if (direction == Direction.Left) {
+            x = normalize(x-1, width);
+        } else if (direction == Direction.Right) {
+            x = normalize(x+1, width);
+        } else {
+            throw new Error("Unknown direction: " + direction);
+        }
+    }
 	return [x, y];
 }
 		
