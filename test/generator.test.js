@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
-import { Room, generateRoom, generateLevel, validateCorridorStart, validCorridorDirection, validCorridorDirections, blockedDirection, blockedMove } from '../src/generator.js';
-import { transpose } from '../src/level.js';
+import { Room, generateRoom, generateLevel, validateCorridorStart, validCorridorDirection, validCorridorDirections, blockedDirection, blockedMove, addCorridor } from '../src/generator.js';
+import { transpose, invert } from '../src/level.js';
 import { Direction } from '../src/engine-types.js';
 
 
@@ -29,6 +29,19 @@ const ONE_ROOM = transpose([
 [1,1,1,1,1,1,1,1,1,1],
 [1,1,1,1,1,1,1,1,1,1],
 ]);
+
+function invertDirection(dir) {
+    switch(dir) {
+        case Direction.Left:
+            return Direction.Right;
+        case Direction.Up:
+            return Direction.Down;
+        case Direction.Right:
+            return Direction.Left;
+        case Direction.Down:
+            return Direction.Up;
+    }
+}
 
 describe('Room', () => {
 
@@ -158,6 +171,11 @@ test('generateLevel', () => {
 		.mockReturnValueOnce( 6 )
 		.mockReturnValueOnce( 4 )
 		.mockReturnValueOnce( 0 )
+		.mockReturnValueOnce( 2 )
+
+		.mockReturnValueOnce( 1 )
+		.mockReturnValueOnce( 4 )
+		.mockReturnValueOnce( 2 )
 		.mockReturnValueOnce( 2 )
 		;
 	const level = generateLevel(10, 9, 3, randomInt);
@@ -327,8 +345,25 @@ const paramValidCorridorDirection = [
 	[4,1, Direction.Left, true],
 	[0,2, Direction.Up, false],
 	[0,2, Direction.Down, false],
+	[0,2, Direction.Left, false],
+	[0,2, Direction.Right, true],
+	[0,2, Direction.Right, true],
 	[5,2, Direction.Up, false],
 	[5,2, Direction.Down, false],
+	[5,2, Direction.Left, false],
+	[5,2, Direction.Right, true],
+	[5,1, Direction.Up, false],
+	[5,1, Direction.Down, false],
+	[5,1, Direction.Left, true],
+	[5,1, Direction.Right, true],
+	[1,5, Direction.Left, false],
+	[1,5, Direction.Right, false],
+	[1,5, Direction.Up, true],
+	[1,5, Direction.Down, true],
+	[0,1, Direction.Up, false],
+	[0,1, Direction.Down, false],
+	[0,1, Direction.Left, true],
+	[0,1, Direction.Right, true],
 ];
 
 test.each(paramValidCorridorDirection)(
@@ -343,16 +378,23 @@ test.each(paramValidCorridorDirection)(
 		 [1,1,1,1,1,1],
 		]);
 		expect(validCorridorDirection(level, x,y,direction)).toBe(expected);
+		expect(validCorridorDirection(invert(level), 5-x, 5-y, invertDirection(direction))).toBe(expected);
 	}
 );
 
 const paramValidCorridorDirections = [
-	[1,1, [[1,0],[2,1],[1,2],[0,1]]], // all directions OK
-	[1,0, [[1,5],[1,1]]],			  // including wraparound, but not along edge of level
-	[1,4, [[1,3],[1,5]]],			  // and not when we end up bordering a room
-	[2,1, [[3,1],[1,1]]],			  // not even diagonally
-	[4,1, [[5,1],[3,1]]],			  // also not wraparound where the connecting square on the other side borders a room
-	[3,3, [[3,2],[2,3]]],			  // can't go back either
+    // all directions OK
+	[1,1, [Direction.Up, Direction.Right, Direction.Down, Direction.Left]],
+	// including wraparound, but not along edge of level
+	[1,0, [Direction.Up, Direction.Down]],
+	// and not when we end up bordering a room
+	[1,4, [Direction.Up, Direction.Down]],
+	// not even diagonally
+	[2,1, [Direction.Right, Direction.Left]],
+	// also not wraparound where the connecting square on the other side borders a room
+	[4,1, [Direction.Right, Direction.Left]],
+	// can't go back either
+	[3,3, [Direction.Up, Direction.Left]],
 ];
 
 test.each(paramValidCorridorDirections)(
@@ -369,3 +411,132 @@ test.each(paramValidCorridorDirections)(
 		expect(validCorridorDirections(level, x,y)).toMatchObject(expected);
 	}
 );
+
+function pretty(level) {
+    level = transpose(level);
+	const width = level.length;
+	const height = level[0].length;
+    var result = "\n";
+    for(var x=0; x<width; x++) {
+        result += '|';
+        for(var y=0; y<height; y++) {
+            result += level[x][y] == 0 ? " " : "#";
+        }
+        result += '|\n';
+    }
+    return result;
+}
+
+test('addCorridor1', () => {
+	const level = transpose(
+        [[1,1,1,1,1,1,1,1,1,1],
+         [1,1,1,0,0,0,0,1,1,1],
+         [1,1,1,0,0,0,0,1,1,1],
+         [1,1,1,1,1,1,1,1,1,1],
+         [1,1,1,1,1,1,0,0,1,1],
+         [1,1,1,1,1,1,0,0,1,1],
+         [1,1,1,1,1,1,0,0,1,1],
+         [1,1,1,1,1,1,0,0,1,1],
+         [1,1,1,1,1,1,1,1,1,1],
+    ]);
+
+	const expected = transpose(
+        [[1,1,1,1,1,1,1,1,1,1],
+         [1,1,1,0,0,0,0,1,1,1],
+         [1,1,1,0,0,0,0,1,1,1],
+         [1,1,1,1,1,1,1,1,1,1],
+         [0,0,0,0,0,1,0,0,1,0],
+         [1,1,1,1,0,1,0,0,1,1],
+         [1,1,1,1,0,1,0,0,1,1],
+         [1,1,1,1,0,1,0,0,1,1],
+         [1,1,1,1,1,1,1,1,1,1],
+    ]);
+    addCorridor(level, 4, 7);
+    expect(pretty(level)).toMatch(pretty(expected));
+});
+
+test('addCorridor2', () => {
+	const level = transpose(
+        [[1,1,1,1,1,1,1,1,1,1],
+         [1,1,1,0,0,0,0,1,1,1],
+         [1,1,1,0,0,0,0,1,1,1],
+         [1,1,1,1,1,1,1,1,1,1],
+         [1,1,1,1,1,1,0,0,0,1],
+         [1,1,1,1,1,1,0,0,0,1],
+         [1,1,1,1,1,1,0,0,0,1],
+         [1,1,1,1,1,1,0,0,0,1],
+         [1,1,1,1,1,1,1,1,1,1],
+    ]);
+
+	const expected = transpose(
+        [[1,0,1,1,1,1,1,1,1,1],
+         [1,0,1,0,0,0,0,1,1,1],
+         [1,0,1,0,0,0,0,1,1,1],
+         [1,0,1,1,1,1,1,1,1,1],
+         [1,0,0,0,0,1,0,0,0,1],
+         [1,1,1,1,0,1,0,0,0,1],
+         [1,0,0,1,0,1,0,0,0,1],
+         [1,0,1,1,0,1,0,0,0,1],
+         [1,0,1,1,1,1,1,1,1,1],
+    ]);
+    addCorridor(level, 4, 7);
+    expect(pretty(level)).toMatch(pretty(expected));
+});
+
+test('addCorridor3', () => {
+	const level = transpose(
+        [[1,1,1,1,1,1,1,1,1,1],
+         [1,1,1,0,0,0,0,1,1,1],
+         [1,1,1,0,0,0,0,1,1,1],
+         [1,1,1,1,1,1,1,1,1,1],
+         [1,1,1,1,1,1,0,0,0,1],
+         [1,1,1,1,1,1,0,0,0,1],
+         [1,1,1,1,1,1,0,0,0,1],
+         [1,1,1,1,1,1,0,0,0,1],
+         [1,1,1,1,1,1,1,1,1,1],
+    ]);
+
+	const expected = transpose(
+        [[1,0,1,1,1,1,1,1,1,1],
+         [1,0,1,0,0,0,0,1,0,1],
+         [1,0,1,0,0,0,0,1,0,1],
+         [1,1,1,1,1,1,1,1,1,1],
+         [1,0,0,0,0,1,0,0,0,1],
+         [1,0,1,1,0,1,0,0,0,1],
+         [1,0,1,1,0,1,0,0,0,1],
+         [1,0,1,0,0,1,0,0,0,1],
+         [1,0,1,1,1,1,1,1,1,1],
+    ]);
+    addCorridor(level, 1, 2);
+    addCorridor(level, 8, 2);
+    expect(pretty(level)).toMatch(pretty(expected));
+});
+
+test('addCorridor4', () => {
+	const level = transpose(
+        [[1,1,1,1,1,1,1,1,1,1],
+         [1,1,1,0,0,0,0,1,1,1],
+         [1,1,1,0,0,0,0,1,1,1],
+         [1,1,1,1,1,1,1,1,1,1],
+         [1,1,1,1,1,1,0,0,0,1],
+         [1,1,1,1,1,1,0,0,0,1],
+         [1,1,1,1,1,1,0,0,0,1],
+         [1,1,1,1,1,1,0,0,0,1],
+         [1,1,1,1,1,1,1,1,1,1],
+    ]);
+
+	const expected = transpose(
+        [[1,0,1,1,1,1,1,1,1,1],
+         [0,0,1,0,0,0,0,1,0,0],
+         [1,1,1,0,0,0,0,1,0,1],
+         [1,0,1,1,1,1,1,1,1,1],
+         [1,0,1,1,0,1,0,0,0,1],
+         [1,0,1,1,0,1,0,0,0,1],
+         [1,0,1,1,0,1,0,0,0,1],
+         [1,0,1,0,0,1,0,0,0,1],
+         [1,0,1,1,1,1,1,1,1,1],
+    ]);
+    addCorridor(level, 8, 2);
+    addCorridor(level, 4, 4);
+    expect(pretty(level)).toMatch(pretty(expected));
+});

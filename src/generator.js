@@ -120,24 +120,35 @@ function validCorridorDirection(level, x, y, direction) {
 	    return false;
 	}
 	var [newX, newY] = step(x,y,width,height,direction);
-	if(newX==0 || newX==width-1 || newY==0 || newY==height-1) {
-	    if(blockedDirection(level, newX, newY, direction)) {
-	        return false;
-	    } else {
-        	[newX, newY] = step(newX,newY,width,height,direction);
-        	return !blockedDirection(level, newX, newY, direction);
-	    }
+	if((newX==0 || newX==width-1 || newY==0 || newY==height-1) && !(x==0 || x==width-1 || y==0 || y==height-1)) {
+        [newX, newY] = step(newX,newY,width,height,direction);
+        return !blockedDirection(level, newX, newY, direction);
 	} else {
     	return !blockedDirection(level, newX, newY, direction);
 	}
 }
 
 function validCorridorDirections(level, x, y) {
-	const width = level.length;
-	const height = level[0].length;
     return [Direction.Up, Direction.Right, Direction.Down, Direction.Left]
-        .filter(dir => validCorridorDirection(level, x, y, dir))
-        .map(dir => step(x,y,width,height,dir));
+        .filter(dir => validCorridorDirection(level, x, y, dir));
 }
 
-export { Room, generateLevel, generateRoom, validateCorridorStart, validCorridorDirection, validCorridorDirections, blockedDirection, blockedMove }
+function addCorridor(level, x, y) {
+	const width = level.length;
+	const height = level[0].length;
+    var dir = Direction.Up;
+    while(true) {
+        level[x][y] = 0;
+        if(!validCorridorDirection(level, x, y, dir)) {
+            const dirs = validCorridorDirections(level, x, y);
+            if(dirs.length == 0) {
+                return;
+            } else {
+                dir = dirs[0];
+            }
+        }
+        [x, y] = step(x, y, width, height, dir);
+    }
+}
+
+export { Room, generateLevel, generateRoom, validateCorridorStart, validCorridorDirection, validCorridorDirections, blockedDirection, blockedMove, addCorridor }

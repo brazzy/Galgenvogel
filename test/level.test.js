@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { Level, transpose } from '../src/level.js';
+import { Level, transpose, invert } from '../src/level.js';
 
 // see https://stackoverflow.com/a/60669731/16883 - but fails with 
 // "randomCoords.mockImplementation is not a function"
@@ -43,6 +43,27 @@ describe('transpose', () => {
 	test('size 0', () => {
 		const result = transpose([]);
 		expect(result).toMatchObject([]);
+	});
+});
+
+describe('invert', () => {
+	test('works', () => {
+		const result = invert([[1,0,0],
+		                       [0,0,0],
+							   [0,1,0]]);
+		expect(result).toMatchObject([[0,1,0],
+									  [0,0,0],
+									  [0,0,1]]);
+	});
+	test('rectangular', () => {
+		const result = invert([[1,0,0],
+							   [0,1,0]]);
+		expect(result).toMatchObject([[0,1,0],
+                           			  [0,0,1]]);
+	});
+	test('size 1', () => {
+		const result = invert([[1]]);
+		expect(result).toMatchObject([[1]]);
 	});
 });
 

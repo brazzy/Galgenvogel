@@ -24,6 +24,19 @@ function transpose(level) {
 	return level[0].map((x,i) => level.map(x => x[i]));
 }
 
+function invert(level) {
+	const width = level.length;
+	const height = level[0].length;
+	const result = [];
+    for(var x=0; x<width; x++) {
+        result.push([]);
+        for(var y=0; y<height; y++) {
+            result[x].push(level[width-x-1][height-y-1]);
+        }
+    }
+    return result;
+}
+
 class Level {
 	/**
 	 * First parameter is the level shape as an int array, with 0=empty and 1=wall.
@@ -154,4 +167,4 @@ function normalize(value, max) {
 	return value;
 }
 
-export {Level, HEIGHT_OFFSET, transpose, step}
+export {Level, HEIGHT_OFFSET, transpose, invert, step}
