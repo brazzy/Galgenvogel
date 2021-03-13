@@ -17,21 +17,21 @@ const EMPTY = {
  * For transposing hardcoded levels so they look natural,
  * and test inputs to test more cases.
  */
-function transpose(level) { 
-	if(level.length == 0) {
+function transpose(array2d) {
+	if(array2d.length == 0) {
 		return [];
 	}
-	return level[0].map((x,i) => level.map(x => x[i]));
+	return array2d[0].map((x,i) => array2d.map(x => x[i]));
 }
 
-function invert(level) {
-	const width = level.length;
-	const height = level[0].length;
+function invert(array2d) {
+	const width = array2d.length;
+	const height = array2d[0].length;
 	const result = [];
     for(var x=0; x<width; x++) {
         result.push([]);
         for(var y=0; y<height; y++) {
-            result[x].push(level[width-x-1][height-y-1]);
+            result[x].push(array2d[width-x-1][height-y-1]);
         }
     }
     return result;
