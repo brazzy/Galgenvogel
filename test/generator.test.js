@@ -178,19 +178,19 @@ test('generateLevel', () => {
 		.mockReturnValueOnce( 2 )
 		.mockReturnValueOnce( 2 )
 		;
-	const level = generateLevel(10, 9, 3, randomInt);
+	const grid = generateLevel(10, 9, 3, randomInt);
 
-	expect(level).toMatchObject(transpose(
-								[[1,1,1,1,1,1,1,1,1,1],
+	expect(grid.print()).toMatch(Wallgrid.transposed(
+								[[1,0,1,1,1,1,1,1,1,1],
+								 [1,0,1,0,0,0,0,1,0,1],
 								 [1,1,1,0,0,0,0,1,1,1],
-								 [1,1,1,0,0,0,0,1,1,1],
-								 [1,1,1,1,1,1,1,1,1,1],
-								 [1,1,1,1,1,1,0,0,1,1],
-								 [1,1,1,1,1,1,0,0,1,1],
-								 [1,1,1,1,1,1,0,0,1,1],
-								 [1,1,1,1,1,1,0,0,1,1],
-								 [1,1,1,1,1,1,1,1,1,1],
-								 ]));
+								 [0,0,1,1,1,1,1,1,1,0],
+								 [1,0,1,0,0,1,0,0,1,1],
+								 [1,0,1,1,0,1,0,0,1,1],
+								 [1,0,1,1,0,1,0,0,1,1],
+								 [1,0,1,0,0,1,0,0,1,1],
+								 [1,0,1,1,1,1,1,1,1,1],
+								 ]).print());
 });
 
 describe('Wallgrid', () => {

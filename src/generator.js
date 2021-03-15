@@ -55,17 +55,16 @@ function generateRoom(levelWidth, levelHeight, randomInt) {
 }
 
 function generateLevel(width, height, roomAttempts, randomInt) {
-    const result = [];
-    for(var x=0; x<width; x++) {
-        result.push([]);
-        for(var y=0; y<height; y++) {
-            result[x].push(1);
-        }
-    }
+    const result = Wallgrid.empty(width, height);
     for(var i=0; i<roomAttempts; i++) {
         const room = generateRoom(width, height, randomInt);
-        if(room.fitsWithMargin(result)) {
-            room.writeToLevel(result);
+        result.tryAddRoom(room);
+    }
+    for(var x=0; x<width; x++) {
+        for(var y=0; y<height; y++) {
+            if(result.validateCorridorStart(x,y)) {
+                result.addCorridor(x,y)
+            }
         }
     }
     return result;
@@ -83,6 +82,17 @@ class Wallgrid {
 
     static transposed(array2d) {
         return new Wallgrid(transpose(array2d));
+    }
+
+    static empty(width, height) {
+        const result = [];
+        for(var x=0; x<width; x++) {
+            result.push([]);
+            for(var y=0; y<height; y++) {
+                result[x].push(1);
+            }
+        }
+        return new Wallgrid(result);
     }
 
     invert() {
@@ -106,6 +116,12 @@ class Wallgrid {
             result += '|\n';
         }
         return result;
+    }
+
+    tryAddRoom(room) {
+        if(room.fitsWithMargin(this.grid)) {
+            room.writeToLevel(this.grid);
+        }
     }
 
     step(x, y, ...directions) {
