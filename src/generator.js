@@ -3,6 +3,11 @@
 
 import { step, transpose } from './level.js';
 import { Direction } from './engine-types.js';
+import { shuffle } from './random.js';
+
+const EMPTY = 0;
+const WALL = 1;
+
 
 class Room {
 	constructor(x, y, width, height){
@@ -23,7 +28,7 @@ class Room {
 				return false;
 			}
 			for(var y=this.y; y<this.y+this.height; y++) {
-				if(row[y]===0) {
+				if(row[y]===EMPTY) {
 					return false;
 				}
 			}
@@ -40,7 +45,7 @@ class Room {
 	writeToLevel(level) {
 		for(var x=this.x; x<this.x+this.width; x++) {
 			for(var y=this.y; y<this.y+this.height; y++) {
-			    level[x][y] = 0;
+			    level[x][y] = EMPTY;
 			}
 		}
 	}
@@ -48,26 +53,10 @@ class Room {
 	toString() {
 		return `(${this.x},${this.y} ${this.width}x${this.height})`;
 	}
-}
 
-function generateRoom(levelWidth, levelHeight, randomInt) {
-    return new Room(randomInt(levelWidth), randomInt(levelHeight), randomInt(5)+2, randomInt(5)+2);
-}
-
-function generateLevel(width, height, roomAttempts, randomInt) {
-    const result = Wallgrid.empty(width, height);
-    for(var i=0; i<roomAttempts; i++) {
-        const room = generateRoom(width, height, randomInt);
-        result.tryAddRoom(room);
+    static generate(levelWidth, levelHeight, randomInt) {
+        return new Room(randomInt(levelWidth), randomInt(levelHeight), randomInt(5)+2, randomInt(5)+2);
     }
-    for(var x=0; x<width; x++) {
-        for(var y=0; y<height; y++) {
-            if(result.validateCorridorStart(x,y)) {
-                result.addCorridor(x,y)
-            }
-        }
-    }
-    return result;
 }
 
 class Wallgrid {
@@ -106,12 +95,21 @@ class Wallgrid {
         this.grid = result;
     }
 
-    print() {
+    toString() {
         var result = "\n";
         for(var x=0; x<this.width; x++) {
             result += '|';
             for(var y=0; y<this.height; y++) {
-                result += this.grid[x][y] == 0 ? " " : "#";
+                switch(this.grid[x][y]) {
+                    case EMPTY:
+                        result += " ";
+                        break;
+                    case WALL:
+                        result += "#";
+                        break;
+                    default:
+                        result += this.grid[x][y];
+                }
             }
             result += '|\n';
         }
@@ -135,7 +133,7 @@ class Wallgrid {
 
     blockedMove(x, y, ...directions) {
     	const [newX, newY] = this.step(x,y, ...directions);
-    	return this.grid[newX][newY] === 0;
+    	return this.grid[newX][newY] === EMPTY;
     }
 
     blockedDirection(x, y, direction) {
@@ -187,7 +185,7 @@ class Wallgrid {
     addCorridor(x, y) {
         var dir = Direction.Up;
         while(true) {
-            this.grid[x][y] = 0;
+            this.grid[x][y] = EMPTY;
             if(!this.validCorridorDirection(x, y, dir)) {
                 const dirs = this.validCorridorDirections(x, y);
                 if(dirs.length == 0) {
@@ -200,6 +198,98 @@ class Wallgrid {
         }
     }
 
+    floodFill(x,y,toReplace,replacement) {
+        if(toReplace === replacement) {
+            return;
+        }
+        if(this.grid[x][y] === toReplace) {
+            this.grid[x][y] = replacement;
+            for(const direction of [Direction.Up, Direction.Down, Direction.Right, Direction.Left]) {
+                const [newX, newY] = this.step(x, y, direction);
+                this.floodFill(newX, newY, toReplace, replacement);
+            }
+        }
+    }
+
+    findConnectors() {
+        const result = [];
+        for(var x=0; x<this.width; x++) {
+            for(var y=0; y<this.height; y++) {
+                if(this.grid[x][y] === WALL) {
+                    const entry = [x,y];
+                    for(const direction of [Direction.Up, Direction.Down, Direction.Right, Direction.Left]) {
+                        const [newX, newY] = this.step(x, y, direction);
+                        if(this.grid[newX][newY] !== WALL) {
+                            entry.push(newX);
+                            entry.push(newY);
+                        }
+                    }
+                    if(entry.length===6) {
+                        if(this.grid[entry[2]][entry[3]] !== this.grid[entry[4]][entry[5]]) {
+                            result.push(entry);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    addRoomsAndCorridors(roomAttempts, randomInt) {
+        for(var i=0; i<roomAttempts; i++) {
+            const room = Room.generate(this.width, this.height, randomInt);
+            this.tryAddRoom(room);
+        }
+        for(var x=0; x<this.width; x++) {
+            for(var y=0; y<this.height; y++) {
+                if(this.validateCorridorStart(x,y)) {
+                    this.addCorridor(x,y)
+                }
+            }
+        }
+    }
+
+    openConnection(x,y,x1,y1,x2,y2) {
+        if(this.grid[x][y] !== WALL) {
+            throw "tried to tear down non-existing wall at " + x + "," + y;
+        }
+        if(this.grid[x1][y1] === WALL) {
+            throw "tried to connect wall at " + x1 + "," + y1;
+        }
+        if(this.grid[x2][y2] === WALL) {
+            throw "tried to connect wall at " + x2 + "," + y2;
+        }
+        this.grid[x][y] = this.grid[x1][y1];
+        this.floodFill(x2, y2, this.grid[x2][y2], this.grid[x1][y1])
+    }
+
+    paintAll() {
+        var fillIndex = 2;
+        for(var x=0; x<this.width; x++) {
+            for(var y=0; y<this.height; y++) {
+                if(this.grid[x][y] === EMPTY) {
+                    this.floodFill(x,y,EMPTY,fillIndex++)
+                }
+            }
+        }
+    }
+
+    connectAll() {
+        this.paintAll();
+        const connectors = this.findConnectors();
+        shuffle(connectors);
+        for(var i=0; i<connectors.length/10; i++) {
+            this.openConnection(...connectors[i]);
+        }
+        for(var i=0; i<connectors.length-1; i++) {
+            if(this.grid[connectors[i][2]][connectors[i][3]] !== this.grid[connectors[i][4]][connectors[i][5]]) {
+                this.openConnection(...connectors[i]);
+            }
+        }
+        const c = connectors[0];
+        this.floodFill(c[0], c[1], this.grid[c[0]][c[1]], EMPTY);
+    }
+
 }
 
-export { Room, Wallgrid, generateLevel, generateRoom }
+export { Room, Wallgrid }

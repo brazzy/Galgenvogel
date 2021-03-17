@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { Room, Wallgrid, generateRoom, generateLevel } from '../src/generator.js';
+import { Room, Wallgrid } from '../src/generator.js';
 import { transpose, invert } from '../src/level.js';
 import { Direction } from '../src/engine-types.js';
 
@@ -142,56 +142,19 @@ describe('Room', () => {
                                      ]));
 	});
 
+    test('generate', () => {
+        const randomInt = jest.fn();
+        randomInt
+            .mockReturnValueOnce( 3 )
+            .mockReturnValueOnce( 1 )
+            .mockReturnValueOnce( 2 )
+            .mockReturnValueOnce( 0 );
+
+        expect(Room.generate(10, 10, randomInt).toString()).toBe('(3,1 4x2)');
+    });
 });
 
-test('generateRoom', () => {
-	const randomInt = jest.fn();
-	randomInt
-		.mockReturnValueOnce( 3 )
-		.mockReturnValueOnce( 1 )
-		.mockReturnValueOnce( 2 )
-		.mockReturnValueOnce( 0 );
 
-	expect(generateRoom(10, 10, randomInt).toString()).toBe('(3,1 4x2)');
-});
-
-test('generateLevel', () => {
-	const randomInt = jest.fn();
-	randomInt
-		.mockReturnValueOnce( 3 )
-		.mockReturnValueOnce( 1 )
-		.mockReturnValueOnce( 2 )
-		.mockReturnValueOnce( 0 )
-
-		.mockReturnValueOnce( 1 )
-		.mockReturnValueOnce( 2 )
-		.mockReturnValueOnce( 4 )
-		.mockReturnValueOnce( 1 )
-
-		.mockReturnValueOnce( 6 )
-		.mockReturnValueOnce( 4 )
-		.mockReturnValueOnce( 0 )
-		.mockReturnValueOnce( 2 )
-
-		.mockReturnValueOnce( 1 )
-		.mockReturnValueOnce( 4 )
-		.mockReturnValueOnce( 2 )
-		.mockReturnValueOnce( 2 )
-		;
-	const grid = generateLevel(10, 9, 3, randomInt);
-
-	expect(grid.print()).toMatch(Wallgrid.transposed(
-								[[1,0,1,1,1,1,1,1,1,1],
-								 [1,0,1,0,0,0,0,1,0,1],
-								 [1,1,1,0,0,0,0,1,1,1],
-								 [0,0,1,1,1,1,1,1,1,0],
-								 [1,0,1,0,0,1,0,0,1,1],
-								 [1,0,1,1,0,1,0,0,1,1],
-								 [1,0,1,1,0,1,0,0,1,1],
-								 [1,0,1,0,0,1,0,0,1,1],
-								 [1,0,1,1,1,1,1,1,1,1],
-								 ]).print());
-});
 
 describe('Wallgrid', () => {
     const paramValidateCorridorStart = [
@@ -439,7 +402,7 @@ describe('Wallgrid', () => {
              [1,1,1,1,1,1,1,1,1,1],
         ]);
         grid.addCorridor(4, 7);
-        expect(grid.print()).toMatch(expected.print());
+        expect(grid.toString()).toMatch(expected.toString());
     });
 
     test('addCorridor2', () => {
@@ -467,7 +430,7 @@ describe('Wallgrid', () => {
              [1,0,1,1,1,1,1,1,1,1],
         ]);
         grid.addCorridor(4, 7);
-        expect(grid.print()).toMatch(expected.print());
+        expect(grid.toString()).toMatch(expected.toString());
     });
 
     test('addCorridor3', () => {
@@ -496,7 +459,7 @@ describe('Wallgrid', () => {
         ]);
         grid.addCorridor(1, 2);
         grid.addCorridor(8, 2);
-        expect(grid.print()).toMatch(expected.print());
+        expect(grid.toString()).toMatch(expected.toString());
     });
 
     test('addCorridor4', () => {
@@ -525,8 +488,222 @@ describe('Wallgrid', () => {
         ]);
         grid.addCorridor(8, 2);
         grid.addCorridor(4, 4);
-        expect(grid.print()).toMatch(expected.print());
+        expect(grid.toString()).toMatch(expected.toString());
     });
+
+    const paramFloodFill = [
+        [
+            [[1,1,0,1,1],
+             [1,1,0,0,1],
+             [0,0,0,0,0],
+             [1,1,0,0,1],
+             [1,1,0,1,1]],
+             2,0,0,2,
+            [[1,1,2,1,1],
+             [1,1,2,2,1],
+             [2,2,2,2,2],
+             [1,1,2,2,1],
+             [1,1,2,1,1]],
+        ],
+        [
+            [[1,1,1,1,1],
+             [0,0,1,0,0],
+             [1,1,1,0,1],
+             [1,0,0,0,1],
+             [1,0,1,1,1]],
+             1,1,0,2,
+            [[1,1,1,1,1],
+             [2,2,1,2,2],
+             [1,1,1,2,1],
+             [1,2,2,2,1],
+             [1,2,1,1,1]]
+        ],
+        [
+            [[1,1,2,1,1],
+             [1,1,2,1,1],
+             [1,1,1,1,1],
+             [1,2,2,1,1],
+             [1,1,2,1,1]],
+             2,0,2,3,
+            [[1,1,3,1,1],
+             [1,1,3,1,1],
+             [1,1,1,1,1],
+             [1,3,3,1,1],
+             [1,1,3,1,1]]
+        ],
+        [
+            [[1,1,2,1,1],
+             [1,1,2,1,1],
+             [1,1,1,1,1],
+             [1,2,2,1,1],
+             [1,1,2,1,1]],
+             0,0,0,2,
+            [[1,1,2,1,1],
+             [1,1,2,1,1],
+             [1,1,1,1,1],
+             [1,2,2,1,1],
+             [1,1,2,1,1]]
+        ],
+        [
+            [[1,1,2,1,1],
+             [1,1,2,1,1],
+             [1,1,1,1,1],
+             [1,2,2,1,1],
+             [1,1,2,1,1]],
+             2,0,0,3,
+            [[1,1,2,1,1],
+             [1,1,2,1,1],
+             [1,1,1,1,1],
+             [1,2,2,1,1],
+             [1,1,2,1,1]]
+        ],
+    ];
+
+    test.each(paramFloodFill)(
+        "flood-filling %s at (%s,%s) replacing %s with %s: %s",
+        (array2d, x, y, toReplace, replacement, expected) => {
+            const grid = Wallgrid.transposed(array2d);
+            grid.floodFill(x,y,toReplace,replacement);
+            expect(grid.toString()).toMatch(Wallgrid.transposed(expected).toString());
+        }
+    );
+
+    test('findConnectors', () => {
+        const grid = Wallgrid.transposed(
+            [[1,1,1,1,1,1,1,1,1,1],
+             [1,1,1,2,2,2,2,1,1,1],
+             [1,1,1,2,2,2,2,1,4,1],
+             [1,1,1,1,1,1,1,1,4,1],
+             [1,1,1,1,3,1,4,4,4,1],
+             [1,1,3,3,3,1,4,4,4,1],
+             [1,1,3,1,1,1,4,4,4,1],
+             [1,1,3,3,3,1,4,4,4,1],
+             [1,1,1,1,1,1,1,1,1,1],
+        ]);
+        const expected = JSON.stringify([
+            [4,3,4,2,4,4],
+            [5,4,6,4,4,4],
+            [5,5,6,5,4,5],
+            [5,7,6,7,4,7],
+            [6,3,6,2,6,4],
+            [7,2,8,2,6,2],
+        ]);
+
+        expect(JSON.stringify(grid.findConnectors())).toMatch(expected);
+    });
+
+    test('addRoomsAndCorridors', () => {
+        const randomInt = jest.fn();
+        randomInt
+            .mockReturnValueOnce( 3 )
+            .mockReturnValueOnce( 1 )
+            .mockReturnValueOnce( 2 )
+            .mockReturnValueOnce( 0 )
+
+            .mockReturnValueOnce( 1 )
+            .mockReturnValueOnce( 2 )
+            .mockReturnValueOnce( 4 )
+            .mockReturnValueOnce( 1 )
+
+            .mockReturnValueOnce( 6 )
+            .mockReturnValueOnce( 4 )
+            .mockReturnValueOnce( 0 )
+            .mockReturnValueOnce( 2 )
+
+            .mockReturnValueOnce( 1 )
+            .mockReturnValueOnce( 4 )
+            .mockReturnValueOnce( 2 )
+            .mockReturnValueOnce( 2 )
+            ;
+        const grid = Wallgrid.empty(10, 9);
+        grid.addRoomsAndCorridors(3, randomInt);
+
+        expect(grid.toString()).toMatch(Wallgrid.transposed(
+                                    [[1,0,1,1,1,1,1,1,1,1],
+                                     [1,0,1,0,0,0,0,1,0,1],
+                                     [1,1,1,0,0,0,0,1,1,1],
+                                     [0,0,1,1,1,1,1,1,1,0],
+                                     [1,0,1,0,0,1,0,0,1,1],
+                                     [1,0,1,1,0,1,0,0,1,1],
+                                     [1,0,1,1,0,1,0,0,1,1],
+                                     [1,0,1,0,0,1,0,0,1,1],
+                                     [1,0,1,1,1,1,1,1,1,1],
+                                     ]).toString());
+    });
+
+    const paramConnectErrors = [
+        [1,1,0,0,0,0,"tried to tear down non-existing wall at 1,1"],
+        [1,0,0,0,0,0,"tried to tear down non-existing wall at 1,0"],
+        [0,0,0,1,1,0,"tried to connect wall at 0,1"],
+        [0,0,1,0,0,1,"tried to connect wall at 0,1"],
+    ];
+
+    test.each(paramConnectErrors)(
+        "connecting (%s,%s)(%s,%s)(%s,%s) did not throw %s",
+        (...args) => {
+            const grid = Wallgrid.transposed(
+                [[1,2,1],
+                 [1,0,1],
+                 [1,1,1],
+            ]);
+
+            const wrongConnector = () => {
+                grid.openConnection(...args);
+            }
+            expect(wrongConnector).toThrow(args[6]);
+        }
+    );
+
+    test('openConnection', () => {
+        const grid = Wallgrid.transposed(
+            [[1,2,1,1,1],
+             [1,2,1,3,3],
+             [1,1,1,1,1],
+             [1,2,2,1,1],
+             [1,2,1,1,1],
+        ]);
+
+        const expected = Wallgrid.transposed(
+            [[1,2,1,1,1],
+             [1,2,2,2,2],
+             [1,1,1,1,1],
+             [1,2,2,1,1],
+             [1,2,1,1,1],
+        ]);
+        grid.openConnection(2,1,1,1,3,1);
+
+        expect(grid.toString()).toMatch(expected.toString());
+    });
+
+    test('paintAll', () => {
+        const grid = Wallgrid.transposed(
+            [[1,0,1,1,1,1,1,1,1,1],
+             [1,0,1,0,0,0,0,1,0,1],
+             [1,0,1,0,0,0,0,1,0,1],
+             [1,1,1,1,1,1,1,1,1,1],
+             [1,0,0,0,0,1,0,0,0,1],
+             [1,0,1,1,0,1,0,0,0,1],
+             [1,0,1,1,0,1,0,0,0,1],
+             [1,0,1,0,0,1,0,0,0,1],
+             [1,0,1,1,1,1,1,1,1,1],
+        ]);
+
+        const expected = Wallgrid.transposed(
+            [[1,2,1,1,1,1,1,1,1,1],
+             [1,2,1,3,3,3,3,1,5,1],
+             [1,2,1,3,3,3,3,1,5,1],
+             [1,1,1,1,1,1,1,1,1,1],
+             [1,2,2,2,2,1,4,4,4,1],
+             [1,2,1,1,2,1,4,4,4,1],
+             [1,2,1,1,2,1,4,4,4,1],
+             [1,2,1,2,2,1,4,4,4,1],
+             [1,2,1,1,1,1,1,1,1,1],
+        ]);
+        grid.paintAll();
+
+        expect(grid.toString()).toMatch(expected.toString());
+    });
+
 });
 
 

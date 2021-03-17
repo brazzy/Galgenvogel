@@ -1,42 +1,24 @@
 import { Level, HEIGHT_OFFSET, transpose } from './level.js';
 import { Player } from './player.js';
 import { Monster } from './monster.js';
-import { randomCoords } from './random.js';
+import { randomCoords, randomInt } from './random.js';
 import { Color, Direction } from './engine-types.js';
+import { Wallgrid } from './generator.js';
 
 const FRAME_RATE = 5;
 
 const NUM_MONSTERS = 4;
 
-// grid size of 24 is the engine default, we stick with it for now.
-// content is transposed to make it easier to edit visually.
-const HARDCODED_LEVEL = [
-[1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1],
-[1,1,0,0,0,0,1,1,1,1,0,0,0,1,1,1,1,0,0,0,0,0,1,1],
-[1,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,0,1,1,1,1,1,1],
-[1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1],
-[1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,1,0,1,1,1,0,1,1],
-[1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1],
-[1,1,1,1,0,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,0,1,1],
-[1,0,0,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1],
-[1,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1],
-[1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1],
-[1,1,0,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,1,1],
-[0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0],
-[1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1],
-[1,1,1,0,1,1,1,1,1,0,0,0,0,0,1,1,1,0,1,1,1,1,1,1],
-[1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1],
-[0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0],
-[1,1,1,1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1],
-[1,1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1],
-[1,1,0,0,0,0,1,1,1,1,1,0,1,1,0,0,0,1,1,1,1,1,1,1],
-[1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1],
-[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-[1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1]
-];
+const generator = () => {
+    const result = Wallgrid.empty(24, 22);
+    result.addRoomsAndCorridors(60, randomInt);
+    result.connectAll();
+    console.log(result.toString());
+    return result.grid;
+}
 
 class Galgenvogel {
-	constructor(levelGenerator = () => transpose(HARDCODED_LEVEL), numMonsters = NUM_MONSTERS, random = randomCoords) {
+	constructor(levelGenerator = generator, numMonsters = NUM_MONSTERS, random = randomCoords) {
 		this.level = null;
 		this.levelGenerator = levelGenerator;
 		this.player = new Player(FRAME_RATE);
