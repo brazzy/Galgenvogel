@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 import { Room, Wallgrid } from '../src/generator.js';
 import { transpose, invert } from '../src/level.js';
 import { Direction } from '../src/engine-types.js';
+import { RANDOM } from '../src/random.js';
 
 
 const EMPTY_LEVEL = [
@@ -42,6 +43,10 @@ function invertDirection(dir) {
             return Direction.Up;
     }
 }
+
+afterEach(() => {
+    jest.clearAllMocks();
+});
 
 describe('Room', () => {
 
@@ -143,14 +148,14 @@ describe('Room', () => {
 	});
 
     test('generate', () => {
-        const randomInt = jest.fn();
+        const randomInt = jest.spyOn(RANDOM, "int");
         randomInt
             .mockReturnValueOnce( 3 )
             .mockReturnValueOnce( 1 )
             .mockReturnValueOnce( 2 )
             .mockReturnValueOnce( 0 );
 
-        expect(Room.generate(10, 10, randomInt).toString()).toBe('(3,1 4x2)');
+        expect(Room.generate(10, 10).toString()).toBe('(3,1 4x2)');
     });
 });
 
@@ -593,7 +598,7 @@ describe('Wallgrid', () => {
     });
 
     test('addRoomsAndCorridors', () => {
-        const randomInt = jest.fn();
+        const randomInt = jest.spyOn(RANDOM, "int");
         randomInt
             .mockReturnValueOnce( 3 )
             .mockReturnValueOnce( 1 )
@@ -616,7 +621,7 @@ describe('Wallgrid', () => {
             .mockReturnValueOnce( 2 )
             ;
         const grid = Wallgrid.empty(10, 9);
-        grid.addRoomsAndCorridors(3, randomInt);
+        grid.addRoomsAndCorridors(3);
 
         expect(grid.toString()).toMatch(Wallgrid.transposed(
                                     [[1,0,1,1,1,1,1,1,1,1],
@@ -703,6 +708,33 @@ describe('Wallgrid', () => {
 
         expect(grid.toString()).toMatch(expected.toString());
     });
+
+    test('hasIsolated true', () => {
+        const grid = Wallgrid.transposed(
+            [[1,1,1,1,1,1,1,1],
+             [1,0,0,0,0,0,0,1],
+             [1,0,0,1,0,0,0,1],
+             [1,1,1,1,1,1,1,1],
+             [1,1,1,1,1,1,1,1],
+             [1,1,2,2,2,2,1,1],
+             [1,1,1,1,1,1,1,1],
+        ]);
+        expect(grid.hasIsolated()).toBe(true);
+    });
+
+    test('hasIsolated false', () => {
+        const grid = Wallgrid.transposed(
+            [[1,1,1,1,1,1,1,1],
+             [1,0,0,0,0,0,0,1],
+             [1,0,0,1,1,0,0,1],
+             [1,1,1,1,1,0,0,1],
+             [1,1,1,1,1,0,1,1],
+             [1,1,0,0,0,0,1,1],
+             [1,1,1,1,1,1,1,1],
+        ]);
+        expect(grid.hasIsolated()).toBe(false);
+    });
+
 
 });
 

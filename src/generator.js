@@ -3,10 +3,11 @@
 
 import { step, transpose } from './level.js';
 import { Direction } from './engine-types.js';
-import { shuffle } from './random.js';
+import { RANDOM } from './random.js';
 
 const EMPTY = 0;
 const WALL = 1;
+const DIRECTIONS = [Direction.Up, Direction.Down, Direction.Right, Direction.Left];
 
 
 class Room {
@@ -54,8 +55,8 @@ class Room {
 		return `(${this.x},${this.y} ${this.width}x${this.height})`;
 	}
 
-    static generate(levelWidth, levelHeight, randomInt) {
-        return new Room(randomInt(levelWidth), randomInt(levelHeight), randomInt(5)+2, randomInt(5)+2);
+    static generate(levelWidth, levelHeight) {
+        return new Room(RANDOM.int(levelWidth), RANDOM.int(levelHeight), RANDOM.int(5)+2, RANDOM.int(5)+2);
     }
 }
 
@@ -97,9 +98,9 @@ class Wallgrid {
 
     toString() {
         var result = "\n";
-        for(var x=0; x<this.width; x++) {
+        for(var y=0; y<this.height; y++) {
             result += '|';
-            for(var y=0; y<this.height; y++) {
+            for(var x=0; x<this.width; x++) {
                 switch(this.grid[x][y]) {
                     case EMPTY:
                         result += " ";
@@ -114,6 +115,10 @@ class Wallgrid {
             result += '|\n';
         }
         return result;
+    }
+
+    isEdge(x,y) {
+        return x==0 || x==this.width-1 || y==0 || y==this.height-1;
     }
 
     tryAddRoom(room) {
@@ -169,7 +174,7 @@ class Wallgrid {
     	    return false;
     	}
     	var [newX, newY] = this.step(x,y,direction);
-    	if((newX==0 || newX==this.width-1 || newY==0 || newY==this.height-1) && !(x==0 || x==this.width-1 || y==0 || y==this.height-1)) {
+    	if(this.isEdge(newX, newY) && !this.isEdge(x,y)) {
             [newX, newY] = this.step(newX,newY,direction);
             return !this.blockedDirection(newX, newY, direction);
     	} else {
@@ -204,7 +209,7 @@ class Wallgrid {
         }
         if(this.grid[x][y] === toReplace) {
             this.grid[x][y] = replacement;
-            for(const direction of [Direction.Up, Direction.Down, Direction.Right, Direction.Left]) {
+            for(const direction of DIRECTIONS) {
                 const [newX, newY] = this.step(x, y, direction);
                 this.floodFill(newX, newY, toReplace, replacement);
             }
@@ -217,7 +222,7 @@ class Wallgrid {
             for(var y=0; y<this.height; y++) {
                 if(this.grid[x][y] === WALL) {
                     const entry = [x,y];
-                    for(const direction of [Direction.Up, Direction.Down, Direction.Right, Direction.Left]) {
+                    for(const direction of DIRECTIONS) {
                         const [newX, newY] = this.step(x, y, direction);
                         if(this.grid[newX][newY] !== WALL) {
                             entry.push(newX);
@@ -235,9 +240,9 @@ class Wallgrid {
         return result;
     }
 
-    addRoomsAndCorridors(roomAttempts, randomInt) {
+    addRoomsAndCorridors(roomAttempts) {
         for(var i=0; i<roomAttempts; i++) {
-            const room = Room.generate(this.width, this.height, randomInt);
+            const room = Room.generate(this.width, this.height);
             this.tryAddRoom(room);
         }
         for(var x=0; x<this.width; x++) {
@@ -277,7 +282,7 @@ class Wallgrid {
     connectAll() {
         this.paintAll();
         const connectors = this.findConnectors();
-        shuffle(connectors);
+        RANDOM.shuffle(connectors);
         for(var i=0; i<connectors.length/10; i++) {
             this.openConnection(...connectors[i]);
         }
@@ -288,6 +293,24 @@ class Wallgrid {
         }
         const c = connectors[0];
         this.floodFill(c[0], c[1], this.grid[c[0]][c[1]], EMPTY);
+    }
+
+    /**
+     * If we're unlucky then there can be areas without connectors (i.e. no other area
+     * that can be reached by only removing a single wall. connectAll() will not work in
+     * that case, and fixing it for all possible cases is quite hard. But since it's
+     * rare, we just test for it and can start over in that case.
+     */
+    hasIsolated() {
+        for(var x=0; x<this.width; x++) {
+            for(var y=0; y<this.height; y++) {
+                if(this.grid[x][y] > WALL) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
 }

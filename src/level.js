@@ -1,4 +1,5 @@
 import { Color, Direction } from './engine-types.js';
+import { RANDOM } from './random.js';
 
 // needed to display stats, so level height must be 2 smaller than grid height.
 const HEIGHT_OFFSET = 2;
@@ -41,11 +42,10 @@ class Level {
 	/**
 	 * First parameter is the level shape as an int array, with 0=empty and 1=wall.
 	 */
-	constructor(wallGrid, random){
+	constructor(wallGrid){
 		this.height = wallGrid[0].length;
 		this.width = wallGrid.length;
 		this.heightOffset = HEIGHT_OFFSET; // workaround so we can change it, see level.test.js
-		this.random = random; // workaround so we can mock it, see level.test.js
 		this.grid = [];
 		this.targetDistances = [];
 		for(var x=0; x<this.width; x++) {
@@ -61,7 +61,7 @@ class Level {
 	placeRandomly(being) {
 		var x,y;
 		do {
-			[x, y] = this.random(this.width, this.height);
+			[x, y] = RANDOM.coords(this.width, this.height);
 		} while (this.grid[x][y].spotTaken)
 		this.grid[x][y] = being;
 		being.x = x;

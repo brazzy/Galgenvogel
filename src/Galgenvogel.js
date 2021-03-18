@@ -1,7 +1,6 @@
 import { Level, HEIGHT_OFFSET, transpose } from './level.js';
 import { Player } from './player.js';
 import { Monster } from './monster.js';
-import { randomCoords, randomInt } from './random.js';
 import { Color, Direction } from './engine-types.js';
 import { Wallgrid } from './generator.js';
 
@@ -10,26 +9,28 @@ const FRAME_RATE = 5;
 const NUM_MONSTERS = 4;
 
 const generator = () => {
-    const result = Wallgrid.empty(24, 22);
-    result.addRoomsAndCorridors(60, randomInt);
-    result.connectAll();
-    console.log(result.toString());
+    var result;
+    do {
+        result = Wallgrid.empty(24, 22);
+        result.addRoomsAndCorridors(60);
+        result.connectAll();
+        console.log(result.toString());
+    } while(result.hasIsolated())
     return result.grid;
 }
 
 class Galgenvogel {
-	constructor(levelGenerator = generator, numMonsters = NUM_MONSTERS, random = randomCoords) {
+	constructor(levelGenerator = generator, numMonsters = NUM_MONSTERS) {
 		this.level = null;
 		this.levelGenerator = levelGenerator;
 		this.player = new Player(FRAME_RATE);
-		this.random = random;
 		this.numMonsters = numMonsters;
 		this.monsters = [];
 	}
 	
 	init() {
 		this.monsters = [];
-		this.level = new Level(this.levelGenerator(), this.random);
+		this.level = new Level(this.levelGenerator());
 		this.level.placeRandomly(this.player);
 		this.level.setTarget(this.player);
 		for(var i=0; i<this.numMonsters; i++) {

@@ -1,20 +1,6 @@
 import { jest } from '@jest/globals';
 import { Level, transpose, invert } from '../src/level.js';
-
-// see https://stackoverflow.com/a/60669731/16883 - but fails with 
-// "randomCoords.mockImplementation is not a function"
-//import { randomCoords } from '../src/random.js';
-//jest.mock('../src/random.js', () => ({
-//  __esModule: true,
-//  randomCoords: jest.fn(),
-//}));
-//randomCoords.mockImplementation( () => [DEFAULT_X, DEFAULT_Y] );
-
-// see https://stackoverflow.com/a/40486695/16883 - but fails with 
-// "Cannot assign to read only property 'randomCoords' of object '[object Module]'"
-// import * as random from '../src/random.js';
-// random.randomCoords = jest.fn();
-// random.randomCoords.mockImplementation( () => [DEFAULT_X, DEFAULT_Y] );
+import { RANDOM } from '../src/random.js';
 
 const DEFAULT_X = 1;
 const DEFAULT_Y = 2;
@@ -131,11 +117,15 @@ describe('pathfinding algorithm', () => {
 });
 
 describe('placeRandomly', () => {
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
 	test('works', () => {
 		// workaround
-		const randomCoords = jest.fn();
+		const randomCoords = jest.spyOn(RANDOM, "coords");
 		randomCoords.mockImplementation( () => [DEFAULT_X, DEFAULT_Y] );
-		const level = new Level([[0,0,0],[0,0,0],[0,0,0]], randomCoords);
+		const level = new Level([[0,0,0],[0,0,0],[0,0,0]]);
 		const being = { x: null, y: null }
 
 

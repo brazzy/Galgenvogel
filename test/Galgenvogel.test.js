@@ -4,13 +4,17 @@ import { Monster } from '../src/monster.js';
 import { Level, HEIGHT_OFFSET } from '../src/level.js';
 import { HEAL_DELAY, HEALTH_START, HEALTH_MAX, MAGIC_START, MAGIC_MAX } from '../src/player.js';
 import { jest } from '@jest/globals';
+import { RANDOM } from '../src/random.js';
 
 const NO_WALLS = [[0,0,0], [0,0,0], [0,0,0]];
 
 
 beforeEach(() => {    
-	jest.clearAllMocks();
 	jest.spyOn(window, 'alert').mockImplementation(() => {});
+	RANDOM.reseed(42);
+});
+afterEach(() => {
+    jest.clearAllMocks();
 });
 
 describe('smoketest', () => {	
@@ -39,9 +43,9 @@ describe('smoketest', () => {
 describe('movement', () => {
 	
 	test('basic', () => {
-		const randomCoords = jest.fn();
+		const randomCoords = jest.spyOn(RANDOM, "coords");
 		randomCoords.mockReturnValue( [1,1] );
-		const gv = new Galgenvogel(() => NO_WALLS, 0, randomCoords);
+		const gv = new Galgenvogel(() => NO_WALLS, 0);
 
 		gv.init();
 		expect(gv.player.x).toBe(1);
@@ -65,9 +69,9 @@ describe('movement', () => {
 	});
 
 	test('walls', () => {
-		const randomCoords = jest.fn();
+		const randomCoords = jest.spyOn(RANDOM, "coords");
 		randomCoords.mockReturnValue( [1,1] );
-		const gv = new Galgenvogel(() => [[1,1,1], [1,0,1], [1,1,1]], 0, randomCoords);
+		const gv = new Galgenvogel(() => [[1,1,1], [1,0,1], [1,1,1]], 0);
 
 		gv.init();
 		expect(gv.player.x).toBe(1);
@@ -91,9 +95,9 @@ describe('movement', () => {
 	});
 
 	test('wraparound', () => {
-		const randomCoords = jest.fn();
+		const randomCoords = jest.spyOn(RANDOM, "coords");
 		randomCoords.mockReturnValue( [0,0] );
-		const gv = new Galgenvogel(() => NO_WALLS, 0, randomCoords);
+		const gv = new Galgenvogel(() => NO_WALLS, 0);
 
 		gv.init();
 		expect(gv.player.x).toBe(0);
@@ -117,9 +121,9 @@ describe('movement', () => {
 	});
 
 	test('wraparound blocked by walls up and left', () => {
-		const randomCoords = jest.fn();
+		const randomCoords = jest.spyOn(RANDOM, "coords");
 		randomCoords.mockReturnValue( [0,0] );
-		const gv = new Galgenvogel(() => [[0,0,1], [0,0,0], [1,0,0]], 0, randomCoords);
+		const gv = new Galgenvogel(() => [[0,0,1], [0,0,0], [1,0,0]], 0);
 
 		gv.init();
 		expect(gv.player.x).toBe(0);
@@ -135,9 +139,9 @@ describe('movement', () => {
 	});
 
 	test('wraparound blocked by walls down and right', () => {
-		const randomCoords = jest.fn();
+		const randomCoords = jest.spyOn(RANDOM, "coords");
 		randomCoords.mockReturnValue( [2,2] );
-		const gv = new Galgenvogel(() => [[0,0,1], [0,0,0], [1,0,0]], 0, randomCoords);
+		const gv = new Galgenvogel(() => [[0,0,1], [0,0,0], [1,0,0]], 0);
 
 		gv.init();
 		expect(gv.player.x).toBe(2);
@@ -153,11 +157,11 @@ describe('movement', () => {
 	});
 
 	test('monster follows with limited perception range', () => {
-		const randomCoords = jest.fn();
+		const randomCoords = jest.spyOn(RANDOM, "coords");
 		randomCoords
 			 .mockReturnValueOnce( [0,0] )
 			 .mockReturnValueOnce( [2,2] );
-		const gv = new Galgenvogel(() => [[0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0]], 1, randomCoords);
+		const gv = new Galgenvogel(() => [[0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0]], 1);
 		gv.generateMonster = () => new Monster(Color.Orange, 1, 1, 2);
 
 		gv.init();
@@ -224,11 +228,11 @@ describe('healing', () => {
 
 describe('melee', () => {
 	test('exchange blows', () => {
-		const randomCoords = jest.fn();
+		const randomCoords = jest.spyOn(RANDOM, "coords");
 		randomCoords
 			 .mockReturnValueOnce( [1,1] )
 			 .mockReturnValueOnce( [2,1] );
-		const gv = new Galgenvogel(() => NO_WALLS, 1, randomCoords);
+		const gv = new Galgenvogel(() => NO_WALLS, 1);
 		gv.generateMonster = () => new Monster(Color.Orange, 2, 1, 10);
 
 		gv.init(null);
@@ -250,12 +254,12 @@ describe('melee', () => {
 	});
 	
 	test('kill monsters and win', () => {
-		const randomCoords = jest.fn();
+		const randomCoords = jest.spyOn(RANDOM, "coords");
 		randomCoords
 			 .mockReturnValueOnce( [1,1] )
 			 .mockReturnValueOnce( [0,1] )
 			 .mockReturnValueOnce( [2,1] );
-		const gv = new Galgenvogel(() => NO_WALLS, 2, randomCoords);
+		const gv = new Galgenvogel(() => NO_WALLS, 2);
 		gv.generateMonster = () => new Monster(Color.Orange, 1, 1, 10);
 
 		gv.init();
@@ -283,14 +287,14 @@ describe('melee', () => {
 
 	test('more monsters in next level', () => {
 		const numMonsters = 1;
-		const randomCoords = jest.fn();
+		const randomCoords = jest.spyOn(RANDOM, "coords");
 		randomCoords
 			 .mockReturnValueOnce( [1,1] )
 			 .mockReturnValueOnce( [2,1] )
 			 .mockReturnValueOnce( [1,1] )
 			 .mockReturnValueOnce( [2,1] )
 			 .mockReturnValueOnce( [0,1] );
-		const gv = new Galgenvogel(() => NO_WALLS, numMonsters, randomCoords);
+		const gv = new Galgenvogel(() => NO_WALLS, numMonsters);
 		gv.generateMonster = () => new Monster(Color.Orange, 1, 1, 10);
 
 		gv.init();
@@ -302,11 +306,11 @@ describe('melee', () => {
 	});
 
 	test('get killed and lose', () => {
-		const randomCoords = jest.fn();
+		const randomCoords = jest.spyOn(RANDOM, "coords");
 		randomCoords
 			 .mockReturnValueOnce( [1,1] )
 			 .mockReturnValueOnce( [2,1] );
-		const gv = new Galgenvogel(() => NO_WALLS, 1, randomCoords);
+		const gv = new Galgenvogel(() => NO_WALLS, 1);
 		gv.generateMonster = () => new Monster(Color.Orange, 5, 3, 10);
 
 		gv.init();
@@ -328,10 +332,10 @@ describe('melee', () => {
 
 describe('magic', () => {
 	test('does not work on walls', () => {
-		const randomCoords = jest.fn();
+		const randomCoords = jest.spyOn(RANDOM, "coords");
 		randomCoords
 			 .mockReturnValueOnce( [0,0] );
-		const gv = new Galgenvogel(() => [[0,0],[0,1]], 0, randomCoords);
+		const gv = new Galgenvogel(() => [[0,0],[0,1]], 0);
 
 		gv.init();
 		expect(gv.player.magic).toBe(1);		
@@ -346,11 +350,11 @@ describe('magic', () => {
 	});
 	
 	test('kill monster with magic and win', () => {
-		const randomCoords = jest.fn();
+		const randomCoords = jest.spyOn(RANDOM, "coords");
 		randomCoords
 			 .mockReturnValueOnce( [1,1] )
 			 .mockReturnValueOnce( [2,1] );
-		const gv = new Galgenvogel(() => NO_WALLS, 1, randomCoords);
+		const gv = new Galgenvogel(() => NO_WALLS, 1);
 		gv.generateMonster = () => new Monster(Color.Orange, 4, 1, 10);
 
 		gv.init();
@@ -381,11 +385,11 @@ describe('magic', () => {
 	});
 
 	test('teleport', () => {
-		const randomCoords = jest.fn();
+		const randomCoords = jest.spyOn(RANDOM, "coords");
 		randomCoords
 			 .mockReturnValueOnce( [1,1] )
 			 .mockReturnValueOnce( [2,1] );
-		const gv = new Galgenvogel(() => NO_WALLS, 0, randomCoords);
+		const gv = new Galgenvogel(() => NO_WALLS, 0);
 
 		gv.init();
 		expect(gv.player.x).toBe(1);
@@ -399,12 +403,12 @@ describe('magic', () => {
 	});
 
 	test('magic is limited', () => {
-		const randomCoords = jest.fn();
+		const randomCoords = jest.spyOn(RANDOM, "coords");
 		randomCoords
 			 .mockReturnValueOnce( [1,1] )
 			 .mockReturnValueOnce( [2,1] )
 			 .mockReturnValueOnce( [2,2] );
-		const gv = new Galgenvogel(() => NO_WALLS, 1, randomCoords);
+		const gv = new Galgenvogel(() => NO_WALLS, 1);
 		gv.generateMonster = () => new Monster(Color.Orange, 1, 1, 10);
 
 
