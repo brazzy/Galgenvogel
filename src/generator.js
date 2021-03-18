@@ -190,7 +190,7 @@ class Wallgrid {
         var dir = Direction.Up;
         while(true) {
             this.grid[x][y] = EMPTY;
-            if(!this.validCorridorDirection(x, y, dir)) {
+            if(!this.validCorridorDirection(x, y, dir) || RANDOM.int(10)===9) {
                 const dirs = this.validCorridorDirections(x, y);
                 if(dirs.length == 0) {
                     return;
