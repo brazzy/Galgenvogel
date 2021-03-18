@@ -406,6 +406,7 @@ describe('Wallgrid', () => {
              [1,1,1,1,0,1,0,0,1,1],
              [1,1,1,1,1,1,1,1,1,1],
         ]);
+        jest.spyOn(RANDOM, "int").mockReturnValue(0);
         grid.addCorridor(4, 7);
         expect(grid.toString()).toMatch(expected.toString());
     });
@@ -434,6 +435,7 @@ describe('Wallgrid', () => {
              [1,0,1,1,0,1,0,0,0,1],
              [1,0,1,1,1,1,1,1,1,1],
         ]);
+        jest.spyOn(RANDOM, "int").mockReturnValue(0);
         grid.addCorridor(4, 7);
         expect(grid.toString()).toMatch(expected.toString());
     });
@@ -462,6 +464,7 @@ describe('Wallgrid', () => {
              [1,0,1,0,0,1,0,0,0,1],
              [1,0,1,1,1,1,1,1,1,1],
         ]);
+        jest.spyOn(RANDOM, "int").mockReturnValue(0);
         grid.addCorridor(1, 2);
         grid.addCorridor(8, 2);
         expect(grid.toString()).toMatch(expected.toString());
@@ -491,6 +494,7 @@ describe('Wallgrid', () => {
              [1,0,1,0,0,1,0,0,0,1],
              [1,0,1,1,1,1,1,1,1,1],
         ]);
+        jest.spyOn(RANDOM, "int").mockReturnValue(0);
         grid.addCorridor(8, 2);
         grid.addCorridor(4, 4);
         expect(grid.toString()).toMatch(expected.toString());
@@ -615,10 +619,7 @@ describe('Wallgrid', () => {
             .mockReturnValueOnce( 0 )
             .mockReturnValueOnce( 2 )
 
-            .mockReturnValueOnce( 1 )
-            .mockReturnValueOnce( 4 )
-            .mockReturnValueOnce( 2 )
-            .mockReturnValueOnce( 2 )
+            .mockReturnValue(0)
             ;
         const grid = Wallgrid.empty(10, 9);
         grid.addRoomsAndCorridors(3);

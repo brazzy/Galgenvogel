@@ -7,7 +7,7 @@ import { RANDOM } from './random.js';
 
 const EMPTY = 0;
 const WALL = 1;
-const DIRECTIONS = [Direction.Up, Direction.Down, Direction.Right, Direction.Left];
+const DIRECTIONS = [Direction.Up, Direction.Right, Direction.Down, Direction.Left];
 
 
 class Room {
@@ -183,8 +183,7 @@ class Wallgrid {
     }
 
     validCorridorDirections(x, y) {
-        return [Direction.Up, Direction.Right, Direction.Down, Direction.Left]
-            .filter(dir => this.validCorridorDirection(x, y, dir));
+        return DIRECTIONS.filter(dir => this.validCorridorDirection(x, y, dir));
     }
 
     addCorridor(x, y) {
@@ -196,7 +195,7 @@ class Wallgrid {
                 if(dirs.length == 0) {
                     return;
                 } else {
-                    dir = dirs[0];
+                    dir = dirs[RANDOM.int(dirs.length)];
                 }
             }
             [x, y] = this.step(x, y, dir);
@@ -224,7 +223,7 @@ class Wallgrid {
                     const entry = [x,y];
                     for(const direction of DIRECTIONS) {
                         const [newX, newY] = this.step(x, y, direction);
-                        if(this.grid[newX][newY] !== WALL) {
+                        if(this.grid[newX][newY] !== WALL && !this.isEdge(newX, newY)) {
                             entry.push(newX);
                             entry.push(newY);
                         }
