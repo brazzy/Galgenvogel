@@ -131,6 +131,10 @@ class Wallgrid {
         return step(x, y, this.width, this.height, ...directions);
     }
 
+    at(x,y) {
+        return this.grid[x][y];
+    }
+
     validateCorridorStart(x, y) {
     	const room = new Room(x,y,1,1);
     	return room.fitsWithMargin(this.grid);
@@ -295,6 +299,8 @@ class Wallgrid {
     }
 
     /**
+     * Call only after connectAll().
+     *
      * If we're unlucky then there can be areas without connectors (i.e. no other area
      * that can be reached by only removing a single wall. connectAll() will not work in
      * that case, and fixing it for all possible cases is quite hard. But since it's
@@ -312,6 +318,36 @@ class Wallgrid {
         return false;
     }
 
+    openNeighbours(x,y) {
+        return DIRECTIONS.filter(dir => this.at(...this.step(x,y,dir)) === EMPTY);
+    }
+
+    findDeadEnds() {
+        const result = [];
+        for(var x=0; x<this.width; x++) {
+            for(var y=0; y<this.height; y++) {
+                if(this.at(x,y) === EMPTY && this.openNeighbours(x,y).length === 1) {
+                    result.push([x,y]);
+                }
+            }
+        }
+        return result;
+    }
+
+    removeDeadEnd(x,y) {
+        const openNeighbours = this.openNeighbours(x,y);
+        if(openNeighbours.length==1) {
+            this.grid[x][y] = 1;
+            this.removeDeadEnd(...this.step(x,y,openNeighbours[0]));
+        }
+    }
+
+    removeDeadEnds(oddsToKeepOneIn=0) {
+        const deadEnds = this.findDeadEnds();
+        for(const end of deadEnds) {
+            if(oddsToKeepOneIn === 0 || RANDOM.int(oddsToKeepOneIn)>0 || this.isEdge(...end)) this.removeDeadEnd(...end);
+        }
+    }
 }
 
 export { Room, Wallgrid }

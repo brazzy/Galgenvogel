@@ -14,6 +14,7 @@ const generator = () => {
         result = Wallgrid.empty(24, 22);
         result.addRoomsAndCorridors(60);
         result.connectAll();
+        result.removeDeadEnds(4)
         console.log(result.toString());
     } while(result.hasIsolated())
     return result.grid;
@@ -47,7 +48,7 @@ class Galgenvogel {
 	finishLevel(won) {
 		if(won) {		
 			alert("You win! Let's make it more difficult.");
-			this.numMonsters++;
+			this.numMonsters+=2;
 		} else {
 			alert("You lose! Let's start over.");
 			this.numMonsters = NUM_MONSTERS;
