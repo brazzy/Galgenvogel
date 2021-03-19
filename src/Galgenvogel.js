@@ -8,6 +8,8 @@ const FRAME_RATE = 5;
 
 const NUM_MONSTERS = 4;
 
+const MONSTER_INCREASE = 2;
+
 const generator = () => {
     var result;
     do {
@@ -48,7 +50,7 @@ class Galgenvogel {
 	finishLevel(won) {
 		if(won) {		
 			alert("You win! Let's make it more difficult.");
-			this.numMonsters+=2;
+			this.numMonsters+=MONSTER_INCREASE;
 		} else {
 			alert("You lose! Let's start over.");
 			this.numMonsters = NUM_MONSTERS;
@@ -98,4 +100,4 @@ class Galgenvogel {
 	}
 }
 
-export {Galgenvogel, FRAME_RATE, NUM_MONSTERS}
+export {Galgenvogel, FRAME_RATE, NUM_MONSTERS, MONSTER_INCREASE}

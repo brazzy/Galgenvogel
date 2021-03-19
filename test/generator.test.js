@@ -878,13 +878,13 @@ describe('Wallgrid', () => {
              [1,1,1,1,1,1,1,1],
              [1,1,1,1,1,1,1,1],
         ]);
-        grid.removeDeadEnds(0)
+        grid.removeDeadEnds()
             expect(grid.toString()).toMatch(expected.toString());
     });
 
     test('removeDeadEnds with exceptions', () => {
         jest.spyOn(RANDOM, "int")
-            .mockReturnValueOnce(0)
+            .mockReturnValueOnce(0) // is eliminated regardless because it's a single isolated dot across an edge
             .mockReturnValueOnce(1)
             .mockReturnValueOnce(1)
             .mockReturnValueOnce(0);

@@ -1,4 +1,4 @@
-import { Galgenvogel, NUM_MONSTERS } from '../src/Galgenvogel.js';
+import { Galgenvogel, NUM_MONSTERS, MONSTER_INCREASE } from '../src/Galgenvogel.js';
 import { Color, Direction } from '../src/engine-types.js';
 import { Monster } from '../src/monster.js';
 import { Level, HEIGHT_OFFSET } from '../src/level.js';
@@ -302,7 +302,7 @@ describe('melee', () => {
 		
 		gv.onKeyPress(Direction.Right);
 		expect(window.alert).toHaveBeenCalledWith("You win! Let's make it more difficult.");
-		expect(gv.monsters.length).toBe(numMonsters+1)
+		expect(gv.monsters.length).toBe(numMonsters+MONSTER_INCREASE)
 	});
 
 	test('get killed and lose', () => {
